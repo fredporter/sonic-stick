@@ -56,25 +56,6 @@ LOG_DIR="$BASE_DIR/LOGS"
 mkdir -p "$LOG_DIR"
 VENTOY_INSTALL_LOG="$LOG_DIR/ventoy-install-$(date -Iseconds).log"
 
-# Dependencies
-NEED_EXFAT=0
-if ! command -v exfatresize &>/dev/null; then
-    NEED_EXFAT=1
-    log_warn "exfatresize (exfatprogs) is required to create FLASH partition"
-    read -rp "Install exfatprogs now? [Y/n]: " exfat_ans
-    if [[ ! "$exfat_ans" =~ ^[Nn]$ ]]; then
-        log_info "Installing exfatprogs..."
-        apt-get update -y && apt-get install -y exfatprogs || {
-            log_error "Failed to install exfatprogs; please install manually and rerun"
-            exit 1
-        }
-        NEED_EXFAT=0
-    else
-        log_error "exfatprogs missing; cannot proceed with full rebuild (FLASH needed)"
-        log_info "Install with: sudo apt install exfatprogs"
-        exit 1
-    fi
-fi
 FLASH_DONE=0
 
 log_info "Starting complete rebuild on $USB"
@@ -442,39 +423,73 @@ fi
 # Step 6: Shrink partition 1 and create FLASH data partition
 echo ""
 echo -e "${BLUE}[6/7] Creating FLASH data partition...${NC}"
-echo -e "${YELLOW}This will shrink the Ventoy partition and create a 4GB ext4 partition${NC}"
+echo -e "${YELLOW}This will backup data, repartition, and restore${NC}"
 
-if [ "$NEED_EXFAT" -eq 1 ]; then
-    echo -e "${YELLOW}⚠ exfatresize not found - skipping FLASH partition creation${NC}"
-    echo -e "${YELLOW}  Install it with: sudo apt install exfatprogs${NC}"
+# Get current size of partition 1 in MB
+CURRENT_SIZE=$(parted -s "$USB" unit MB print | grep "^ 1" | awk '{print $4}' | sed 's/MB//')
+DATA_SIZE=4096  # 4GB for data partition
+NEW_SIZE=$((CURRENT_SIZE - DATA_SIZE))
+
+echo "  Current partition size: ${CURRENT_SIZE}MB"
+echo "  New Ventoy partition size: ${NEW_SIZE}MB"
+echo "  FLASH partition size: ${DATA_SIZE}MB (~4GB)"
+echo ""
+
+# Create temporary backup directory
+BACKUP_DIR="/tmp/sonic-backup-$$"
+mkdir -p "$BACKUP_DIR"
+
+echo "  Backing up data from ${USB}1..."
+cp -a /mnt/sonic/* "$BACKUP_DIR/" || {
+    echo -e "${YELLOW}  ⚠ Backup failed, skipping FLASH partition${NC}"
+    rm -rf "$BACKUP_DIR"
     NEW_SIZE=0
-else
-    # Get current size of partition 1 in MB
-    CURRENT_SIZE=$(parted -s "$USB" unit MB print | grep "^ 1" | awk '{print $4}' | sed 's/MB//')
-    DATA_SIZE=4096  # 4GB for data partition
-    NEW_SIZE=$((CURRENT_SIZE - DATA_SIZE))
+}
 
-    echo "  Current partition size: ${CURRENT_SIZE}MB"
-    echo "  New Ventoy partition size: ${NEW_SIZE}MB"
-    echo "  FLASH partition size: ${DATA_SIZE}MB (~4GB)"
-    echo ""
+if [ "$NEW_SIZE" -gt 0 ]; then
+    # Unmount
+    umount /mnt/sonic 2>/dev/null || true
     
-    # First shrink the exFAT filesystem
-    echo "  Shrinking exFAT filesystem..."
-    exfatresize -s $((NEW_SIZE * 1024 * 1024)) "${USB}1" || {
-        echo -e "${YELLOW}  ⚠ Filesystem resize failed, continuing without data partition${NC}"
+    # Delete partition 1 and recreate it smaller
+    echo "  Repartitioning..."
+    parted -s "$USB" rm 1 || {
+        echo -e "${YELLOW}  ⚠ Failed to remove partition${NC}"
         NEW_SIZE=0
     }
-    
-    if [ "$NEW_SIZE" -gt 0 ]; then
-        # Now resize the partition
-        echo "  Resizing partition table..."
-        parted -s "$USB" resizepart 1 ${NEW_SIZE}MB || {
-            echo -e "${YELLOW}  ⚠ Partition resize failed${NC}"
-            NEW_SIZE=0
-        }
-    fi
 fi
+
+if [ "$NEW_SIZE" -gt 0 ]; then
+    parted -s "$USB" mkpart primary exfat 2048s ${NEW_SIZE}MB || {
+        echo -e "${YELLOW}  ⚠ Failed to create partition${NC}"
+        NEW_SIZE=0
+    }
+fi
+
+if [ "$NEW_SIZE" -gt 0 ]; then
+    # Format the new smaller partition
+    echo "  Formatting ${USB}1..."
+    sleep 2
+    partprobe "$USB" 2>/dev/null || true
+    sleep 2
+    mkfs.exfat -L "SONIC" "${USB}1" || {
+        echo -e "${YELLOW}  ⚠ Failed to format partition${NC}"
+        NEW_SIZE=0
+    }
+fi
+
+if [ "$NEW_SIZE" -gt 0 ]; then
+    # Restore data
+    echo "  Restoring data..."
+    mount "${USB}1" /mnt/sonic
+    cp -a "$BACKUP_DIR"/* /mnt/sonic/ || {
+        echo -e "${YELLOW}  ⚠ Failed to restore data${NC}"
+        NEW_SIZE=0
+    }
+    sync
+fi
+
+# Cleanup backup
+rm -rf "$BACKUP_DIR"
 
 if [ "$NEW_SIZE" -gt 0 ]; then
     # Create partition 3 (data)

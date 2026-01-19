@@ -3,6 +3,7 @@
 
 set -euo pipefail
 
+VERSION="1.0.0.4"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 USB="${USB:-/dev/sdb}"
@@ -17,7 +18,7 @@ source "${SCRIPT_DIR}/lib/logging.sh"
 init_logging "sonic-stick"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
-log_section "Sonic Stick Launcher"
+log_section "Sonic Stick Launcher v${VERSION}"
 log_info "Target USB device: $USB (override with USB=/dev/sdX)"
 log_info "Ventoy version: $VENTOY_VERSION_DEFAULT"
 log_info "Repo: $BASE_DIR"

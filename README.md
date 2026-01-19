@@ -1,17 +1,32 @@
-# Sonic Stick Pack v1.0.0.2
+# Sonic Stick Pack v1.0.0.4
 
 **The ultimate multiboot rescue + install USB for Linux sysadmins, makers, and tinkerers.**
 
 Sonic Stick is a Ventoy-powered USB toolkit that boots a custom menu offering rescue tools, installers, persistent storage, and a built-in security dongle—all from one 128 GB stick. Keep it in your pocket, plug into any UEFI machine, and get instant access to TinyCore, Ubuntu, Alpine, Raspberry Pi tools, and more.
 
+## What's New in v1.0.0.4
+
+✨ **Simplified FLASH partition creation**
+- Removed non-existent `exfatresize` dependency
+- Implemented backup/repartition/restore approach for reliable data partition creation
+- FLASH partition (4GB ext4) now created automatically during rebuild
+
+🔧 **VS Code workspace support**
+- Added `sonic-stick.code-workspace` for better development experience
+- Recommended shell script extensions and formatting
+
+📚 **Documentation cleanup**
+- Archived old troubleshooting docs to `docs/.archive/`
+- Streamlined README for clarity
+
 ## What You Get
 
 🚀 **One-stick superpower**
 - **Ventoy bootloader** — no re-imaging needed; add/remove ISOs like files
-- **Clean menu system** — organized by rescue, installers, and utilities
-- **SONIC partition** — main exFAT data partition for ISOs, tools, and logs
-- **CORE persistence** — TinyCore/uDOS workspace that survives reboots
-- **FLASH swap** — virtual RAM safety net for low-memory machines
+- **Clean menu system** — organized by Ubuntu flavors, Minimal, and Rescue categories
+- **SONIC partition** — main exFAT data partition for ISOs, tools, and Raspberry Pi images
+- **FLASH partition** — ext4 data partition for logs, sessions, and library tracking
+- **Auto-rebuild** — single command to wipe and rebuild entire stick
 
 💾 **Pre-loaded payloads** (ISOs not included; you download)
 - **TinyCore 15** — tiny, fast, ultra-portable
@@ -22,49 +37,63 @@ Sonic Stick is a Ventoy-powered USB toolkit that boots a custom menu offering re
 📋 **Partition layout (128 GB)**
 ```
 Sonic Stick (128 GB)
-├─ Partition 1: BOOT Ventoy EFI/Boot (created by Ventoy)
-├─ Partition 2: SONIC Ventoy Data (exFAT, ~90 GB)  ← ISOs + tools
-├─ Partition 3: CORE Persistence (ext4, 16 GB)     ← TinyCore/uDOS
-└─ Partition 4: FLASH (linux-swap, 8 GB)           ← virtual RAM
+├─ Partition 1: SONIC Ventoy Data (exFAT, ~110 GB)  ← ISOs + tools + RaspberryPi images
+├─ Partition 2: VTOYEFI (FAT32, 32 MB)              ← Ventoy EFI boot
+└─ Partition 3: FLASH (ext4, 4 GB)                  ← logs, sessions, library tracking
 ```
 
 ## Quick Start
 
-### One-command launcher (Ubuntu)
-- Click-to-run: `gnome-terminal -- bash -lc "cd ~/Code/sonic-stick && ./scripts/sonic-stick.sh"`
-- CLI: `sudo ./scripts/sonic-stick.sh` (menu to download payloads, install/upgrade Ventoy, reflash, rebuild, scan, collect logs)
+### One-command rebuild (Ubuntu)
+```bash
+sudo ./scripts/sonic-stick.sh
+```
+Interactive menu to:
+- Download payloads (ISOs + Ventoy)
+- Install/upgrade Ventoy
+- **Full rebuild from scratch** (wipes, installs Ventoy, copies ISOs, creates FLASH partition)
+- Scan library and generate catalog
+- Collect logs for troubleshooting
 
-### Troubleshooting
+### Manual workflow
 
-For detailed troubleshooting and boot error fixes, see archived documentation in [docs/.archive/](docs/.archive/).
-
-### 1. Download payloads (30–60 min)
+#### 1. Download payloads (30–60 min)
 ```bash
 bash scripts/download-payloads.sh
 ```
 Fetches TinyCore, Ubuntu, Alpine, RaspberryPi images, and Ventoy. wget resumes partial downloads.
 
-### 2. Reflash & partition USB (on Ubuntu)
+#### 2. Full rebuild from scratch
 ```bash
-sudo bash scripts/reflash-complete.sh
+sudo bash scripts/rebuild-from-scratch.sh
 ```
-- Installs Ventoy (creates BOOT and SONIC partitions)
-- Copies ISOs to the SONIC partition
-- Walks you through GParted to create CORE (persistence) and FLASH (swap) partitions
+- Wipes USB completely
+- Installs fresh Ventoy bootloader
+- Copies all ISOs with organized structure
+- Installs custom Ventoy menu
+- Relabels main partition to SONIC
+- **Creates FLASH partition (4GB ext4) automatically**
+- Initializes library catalog system
 
-### 3. Boot & configure
+The rebuild will prompt you to type "REBUILD" to confirm the destructive operation.
+
+### Troubleshooting
+
+For detailed troubleshooting and boot error fixes, see archived documentation in [docs/.archive/](docs/.archive/).
+
+#### 3. Boot & configure
 - Reboot with SONIC stick inserted
 - Select from the Ventoy menu:
-  - **[LIVE]** Alpine — runs from USB, type `setup-alpine` to install
-  - **[INSTALLER]** Ubuntu flavours — installs to your system disk
-  - **[IMAGES]** Raspberry Pi images — write to SD cards
-- See [docs/ventoy-usage.md](docs/ventoy-usage.md) for what's live vs installer
+  - **Ubuntu 22.04.5 LTS Desktop** — full Ubuntu installation
+  - **Lubuntu 22.04.5 LTS** — lightweight Ubuntu flavor
+  - **Ubuntu MATE 22.04.5 LTS** — classic desktop experience
+  - **Alpine Linux 3.19.1** — minimal rescue environment
+  - **TinyCore Pure64 15.0** — ultra-lightweight rescue system
 
-### 4. Customize the Ventoy menu (optional)
+#### 4. Customize the Ventoy menu (optional)
 ```bash
 sudo mkdir -p /mnt/sonic
-sudo mount /dev/sdb2 /mnt/sonic  # Partition 2 is SONIC (main data partition)
-sudo cp config/ventoy/ventoy.json.example /mnt/sonic/ventoy/ventoy.json
+sudo mount /dev/sdb1 /mnt/sonic  # Partition 1 is SONIC (main data partition)
 sudo nano /mnt/sonic/ventoy/ventoy.json  # Edit menu names & descriptions
 sudo umount /mnt/sonic
 # Reboot—menu updates automatically!
@@ -74,59 +103,56 @@ sudo umount /mnt/sonic
 
 ```
 sonic-stick/
-├── README.md                    # This file
-├── LICENSE                      # MIT License
-├── .gitignore                   # Excludes large ISO/payloads
+├── README.md                           # This file
+├── LICENSE                             # MIT License
+├── sonic-stick.code-workspace          # VS Code workspace configuration
+├── .gitignore                          # Excludes large ISO/payloads
 ├── docs/
-│   ├── overview.md              # Project goals & architecture
-│   ├── QUICK-START.md           # Short build walkthrough
-│   ├── partition-scheme.md      # Current partitioning plan
-│   ├── ventoy-usage.md          # How to boot and navigate Ventoy
-│   └── logging-and-debugging.md # How to capture and share logs
+│   └── .archive/                       # Archived troubleshooting docs
 ├── config/
 │   └── ventoy/
-│       └── ventoy.json.example  # Sample Ventoy menu config
+│       ├── ventoy.json                 # Active Ventoy menu config
+│       └── ventoy.json.example         # Sample Ventoy menu config
 ├── scripts/
-│   ├── collect-logs.sh          # Build/boot support bundle collector
-│   ├── download-payloads.sh     # Fetch ISOs (wget-based)
-│   ├── install-ventoy.sh        # Install/upgrade Ventoy
-│   ├── sonic-stick.sh           # Unified launcher/menu (Ubuntu-friendly)
-│   ├── reflash-complete.sh      # Full reflash + partitioning workflow
-│   ├── rebuild-from-scratch.sh  # Full wipe + rebuild with data partition
-│   ├── create-data-partition.sh # Add FLASH partition
-│   ├── setup-data-partition-guided.sh # GParted-guided data partition
-│   ├── scan-library.sh          # Generate ISO catalog
-│   ├── tinycore-bootlog.sh      # Boot logging hook for TinyCore
-│   └── lib/logging.sh           # Shared logging helpers
-├── ISOS/                        # (empty; populated by download script)
+│   ├── sonic-stick.sh                  # Unified launcher/menu (main entry point)
+│   ├── rebuild-from-scratch.sh         # Full wipe + rebuild with FLASH partition
+│   ├── download-payloads.sh            # Fetch ISOs (wget-based)
+│   ├── install-ventoy.sh               # Install/upgrade Ventoy
+│   ├── create-data-partition.sh        # Add FLASH partition manually
+│   ├── scan-library.sh                 # Generate ISO catalog
+│   ├── collect-logs.sh                 # Build/boot support bundle collector
+│   └── lib/logging.sh                  # Shared logging helpers
+├── ISOS/                               # (empty; populated by download script)
 │   ├── Ubuntu/
 │   ├── Rescue/
 │   └── Minimal/
-├── RaspberryPi/                 # (empty; populated by download script)
-└── TOOLS/                       # (empty; populated by download script)
+├── RaspberryPi/                        # (empty; populated by download script)
+├── TOOLS/                              # (empty; populated by download script)
+└── LOGS/                               # Build and operation logs
 ```
 
 ## Logging & Debugging
 
-- All major scripts now tee output to `LOGS/<script>-<timestamp>.log`. If the stick is mounted, logs are written to `/media/$USER/SONIC/LOGS`; otherwise they land in the repo `LOGS/` folder.
-- Turn on shell tracing with `DEBUG=1` (for example `DEBUG=1 sudo bash scripts/reflash-complete.sh`).
-- Collect a support bundle after a failing boot: `sudo bash scripts/collect-logs.sh /dev/sdX` (replace `/dev/sdX` with your stick). The bundle includes `lsblk`, `blkid`, `dmesg` tail, Ventoy config/version, and data-partition logs without copying ISOs.
-- TinyCore boots can append hardware/dmesg info to the stick via `scripts/tinycore-bootlog.sh`, writing `LOGS/boot.log` (prefers `FLASH` when mounted).
-- Details and what to attach when filing issues are in [docs/logging-and-debugging.md](docs/logging-and-debugging.md).
+- All major scripts tee output to `LOGS/<script>-<timestamp>.log`
+- Logs are written to the repo `LOGS/` folder, or to the stick's FLASH partition when mounted
+- Turn on shell tracing with `DEBUG=1` (example: `DEBUG=1 sudo bash scripts/rebuild-from-scratch.sh`)
+- Collect support bundle: `sudo bash scripts/collect-logs.sh /dev/sdX`
+  - Includes `lsblk`, `blkid`, `dmesg`, Ventoy config/version, and FLASH partition logs
+  - Does not copy ISOs (bundle stays small)
+- For troubleshooting boot errors and Ventoy issues, see [docs/.archive/](docs/.archive/)
 
 ## Requirements
 
 **To build the stick:**
-- Ubuntu 22.04 LTS or similar (tested on noble)
+- Ubuntu 22.04 LTS or similar
 - sudo access
 - wget (for downloads)
-- GParted (for partitioning)
 - ~150 GB free disk space (for downloads)
-- Ventoy version pinned to 1.1.10 (auto-downloaded by launcher or download script)
+- Ventoy 1.1.10 (auto-downloaded)
 
 **To boot the stick:**
 - Any UEFI PC (x86_64)
-- 2–4 GB RAM (TinyCore needs less)
+- 2–4 GB RAM minimum
 - Ventoy supports ~100+ ISOs simultaneously
 
 ## Getting Started (TL;DR)
@@ -137,23 +163,35 @@ sonic-stick/
    cd sonic-stick
    ```
 
-2. **Download ISOs:**
+2. **Download ISOs**:
    ```bash
    bash scripts/download-payloads.sh
    ```
 
-3. **Plug in USB, then reflash:**
+3. **Plug in USB and rebuild from scratch**:
    ```bash
-   sudo bash scripts/reflash-complete.sh
+   sudo bash scripts/sonic-stick.sh
+   # Select option: [R] Full Rebuild from Scratch
+   # Type "REBUILD" when prompted to confirm
    ```
 
-4. **Follow GParted prompts** to create CORE and FLASH partitions.
+4. **Boot & enjoy!** SONIC partition will auto-mount at `/media/$USER/SONIC`.
 
-5. **Boot & enjoy!** SONIC partition will auto-mount at `/media/$USER/SONIC`.
+## Development
+
+Open the workspace in VS Code:
+```bash
+code sonic-stick.code-workspace
+```
+
+The workspace includes:
+- Shell script formatting settings
+- Recommended extensions (ShellCheck, shell-format, Bash IDE)
+- Search exclusions for logs and vendor files
 
 ## Contributing
 
-Found a bug? Want to add a feature? 🙌 See [CONTRIBUTING.md](docs/CONTRIBUTING.md).
+Found a bug? Want to add a feature? 🙌 See [docs/.archive/CONTRIBUTING.md](docs/.archive/CONTRIBUTING.md).
 
 ## License
 
