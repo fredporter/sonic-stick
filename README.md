@@ -9,9 +9,9 @@ Sonic Stick is a Ventoy-powered USB toolkit that boots a custom menu offering re
 🚀 **One-stick superpower**
 - **Ventoy bootloader** — no re-imaging needed; add/remove ISOs like files
 - **Clean menu system** — organized by rescue, installers, and utilities
-- **Persistent storage** — TinyCore/uDOS workspace that survives reboots
-- **Swap partition** — virtual RAM safety net for low-memory machines
-- **Security dongle** — encrypted vault for SSH keys, GPG certs, BIOS configs
+- **SONIC partition** — main exFAT data partition for ISOs, tools, and logs
+- **CORE persistence** — TinyCore/uDOS workspace that survives reboots
+- **FLASH swap** — virtual RAM safety net for low-memory machines
 
 💾 **Pre-loaded payloads** (ISOs not included; you download)
 - **TinyCore 15** — tiny, fast, ultra-portable
@@ -21,12 +21,11 @@ Sonic Stick is a Ventoy-powered USB toolkit that boots a custom menu offering re
 
 📋 **Partition layout (128 GB)**
 ```
-Sonic Stick (SONIC label)
-├─ Partition 1: Ventoy Data (exFAT, ~82 GB) — ISOs, tools, logs, config
-├─ Partition 2: VTOYEFI (FAT16, 32 MB, auto-created) — Ventoy EFI/Boot
-├─ Partition 3: TCE Persistence (ext4, 16 GB) — TinyCore persistent workspace
-├─ Partition 4: SONIC_SWAP (8 GB) — virtual RAM for low-memory systems
-└─ Partition 5: DONGLE (ext4, 2 GB) — encrypted key vault + BIOS backups
+Sonic Stick (128 GB)
+├─ Partition 1: BOOT Ventoy EFI/Boot (created by Ventoy)
+├─ Partition 2: SONIC Ventoy Data (exFAT, ~90 GB)  ← ISOs + tools
+├─ Partition 3: CORE Persistence (ext4, 16 GB)     ← TinyCore/uDOS
+└─ Partition 4: FLASH (linux-swap, 8 GB)           ← virtual RAM
 ```
 
 ## Quick Start
@@ -49,9 +48,9 @@ Fetches TinyCore, Ubuntu, Alpine, RaspberryPi images, and Ventoy. wget resumes p
 ```bash
 sudo bash scripts/reflash-complete.sh
 ```
-- Installs Ventoy
-- Copies ISOs to the stick
-- Walks you through GParted to create persistence, swap, and security partitions
+- Installs Ventoy (creates BOOT and SONIC partitions)
+- Copies ISOs to the SONIC partition
+- Walks you through GParted to create CORE (persistence) and FLASH (swap) partitions
 
 ### 3. Boot & configure
 - Reboot with SONIC stick inserted
@@ -64,7 +63,7 @@ sudo bash scripts/reflash-complete.sh
 ### 4. Customize the Ventoy menu (optional)
 ```bash
 sudo mkdir -p /mnt/sonic
-sudo mount /dev/sdb1 /mnt/sonic  # Partition 1 is the main data partition
+sudo mount /dev/sdb2 /mnt/sonic  # Partition 2 is SONIC (main data partition)
 sudo cp config/ventoy/ventoy.json.example /mnt/sonic/ventoy/ventoy.json
 sudo nano /mnt/sonic/ventoy/ventoy.json  # Edit menu names & descriptions
 sudo umount /mnt/sonic
@@ -148,9 +147,9 @@ sonic-stick/
    sudo bash scripts/reflash-complete.sh
    ```
 
-4. **Follow GParted prompts** to shrink exFAT and create 4 extra partitions.
+4. **Follow GParted prompts** to create CORE and FLASH partitions.
 
-5. **Boot & enjoy!** USB will auto-mount at `/media/$USER/SONIC`.
+5. **Boot & enjoy!** SONIC partition will auto-mount at `/media/$USER/SONIC`.
 
 ## Contributing
 

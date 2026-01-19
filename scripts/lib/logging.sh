@@ -33,13 +33,27 @@ init_logging() {
     done
   fi
 
+  # Fallback to repo LOGS directory
   LOG_ROOT="${LOG_ROOT:-${BASE_DIR:-${__LOG_REPO_ROOT}}/LOGS}"
-  mkdir -p "$LOG_ROOT"
+  
+  # Try to create LOG_ROOT if it doesn't exist
+  if [[ ! -d "$LOG_ROOT" ]]; then
+    if ! mkdir -p "$LOG_ROOT" 2>/dev/null; then
+      # Can't create preferred location, use /tmp
+      LOG_ROOT="/tmp/sonic-stick-logs"
+      mkdir -p "$LOG_ROOT" || LOG_ROOT="/tmp"
+    fi
+  fi
 
   LOG_FILE="${LOG_FILE:-${LOG_ROOT}/${script_name}-${timestamp}.log}"
   if ! touch "$LOG_FILE" 2>/dev/null; then
-    echo "ERROR: cannot write log file at $LOG_FILE" >&2
-    exit 1
+    # Fallback to /tmp if we can't write to preferred location
+    LOG_FILE="/tmp/${script_name}-${timestamp}.log"
+    if ! touch "$LOG_FILE" 2>/dev/null; then
+      echo "ERROR: cannot write log file anywhere (tried $LOG_ROOT and /tmp)" >&2
+      exit 1
+    fi
+    echo "WARNING: Using fallback log location: $LOG_FILE" >&2
   fi
 
   export LOG_ROOT LOG_FILE
