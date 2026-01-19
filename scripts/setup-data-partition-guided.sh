@@ -6,7 +6,14 @@
 # Usage: sudo bash scripts/setup-data-partition-guided.sh
 #
 
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+source "${SCRIPT_DIR}/lib/logging.sh"
+init_logging "setup-data-partition-guided"
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 USB="/dev/sdb"
 
@@ -16,6 +23,8 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
+
+log_info "Launching guided data partition setup for $USB"
 
 echo -e "${BLUE}═══════════════════════════════════════${NC}"
 echo -e "${BLUE}Sonic Stick - Setup Data Partition${NC}"

@@ -7,12 +7,14 @@
 # Usage: bash scripts/download-payloads.sh
 #
 
-set -e
+set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TOOLS_DIR="$BASE_DIR/TOOLS"
 ISOS_DIR="$BASE_DIR/ISOS"
 RASPI_DIR="$BASE_DIR/RaspberryPi"
+
+VENTOY_VERSION="1.1.10"
 
 # Create directories
 mkdir -p "$TOOLS_DIR" "$ISOS_DIR/Minimal" "$ISOS_DIR/Rescue" "$ISOS_DIR/Ubuntu" "$RASPI_DIR"
@@ -24,7 +26,7 @@ echo ""
 # Define all downloads as an associative array
 # Format: "destination|url"
 declare -a DOWNLOADS=(
-  "$TOOLS_DIR/ventoy-1.0.98-linux.tar.gz|https://github.com/ventoy/Ventoy/releases/download/v1.0.98/ventoy-1.0.98-linux.tar.gz"
+  "$TOOLS_DIR/ventoy-${VENTOY_VERSION}-linux.tar.gz|https://github.com/ventoy/Ventoy/releases/download/v${VENTOY_VERSION}/ventoy-${VENTOY_VERSION}-linux.tar.gz"
   "$ISOS_DIR/Rescue/CorePure64-15.0.iso|http://tinycorelinux.net/15.x/x86_64/release/CorePure64-15.0.iso"
   "$ISOS_DIR/Minimal/alpine-standard-3.19.1-x86_64.iso|https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/x86_64/alpine-standard-3.19.1-x86_64.iso"
   "$RASPI_DIR/raspios-bookworm-arm64-lite.img.xz|https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2024-03-15/2024-03-15-raspios-bookworm-arm64-lite.img.xz"

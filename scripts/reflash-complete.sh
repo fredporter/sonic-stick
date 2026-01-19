@@ -6,10 +6,17 @@
 # Usage: sudo bash scripts/reflash-complete.sh
 #
 
-set -e
+set -euo pipefail
 
-USB="/dev/sdb"  # Edit this to your USB device
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+USB="${USB:-/dev/sdb}"  # Edit this to your USB device or set USB=/dev/sdX
+
+source "${SCRIPT_DIR}/lib/logging.sh"
+init_logging "reflash-complete"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+log_info "Starting Sonic Stick reflash for $USB"
 
 # Colors
 RED='\033[0;31m'
@@ -50,6 +57,7 @@ if sudo mount "${USB}1" /mnt/sonic; then
   sudo mkdir -p /mnt/sonic/ISOS/{Ubuntu,Minimal,Rescue}
   sudo mkdir -p /mnt/sonic/RaspberryPi
   sudo mkdir -p /mnt/sonic/ventoy
+  sudo mkdir -p /mnt/sonic/LOGS
   
   # Copy payloads
   if [[ -d "$BASE_DIR/ISOS/Ubuntu" ]]; then

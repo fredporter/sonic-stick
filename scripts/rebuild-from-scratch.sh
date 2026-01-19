@@ -6,10 +6,16 @@
 # Usage: sudo bash scripts/rebuild-from-scratch.sh
 #
 
-set -e
+set -euo pipefail
 
-USB="/dev/sdb"
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+USB="${USB:-/dev/sdb}"
+VENTOY_VERSION="${VENTOY_VERSION:-1.1.10}"
+
+source "${SCRIPT_DIR}/lib/logging.sh"
+init_logging "rebuild-from-scratch"
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 # Colors
 RED='\033[0;31m'
@@ -18,6 +24,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
+
+log_info "Starting complete rebuild on $USB"
+log_env_snapshot
 
 if [[ $EUID -ne 0 ]]; then
    echo -e "${RED}This script must be run as root (use sudo)${NC}"
@@ -67,7 +76,7 @@ echo -e "${BLUE}[2/7] Wiping disk and installing fresh Ventoy...${NC}"
 echo -e "${YELLOW}This will take 30-60 seconds...${NC}"
 
 # Find Ventoy installation
-VENTOY_DIR="$BASE_DIR/TOOLS/ventoy-1.0.98"
+VENTOY_DIR="$BASE_DIR/TOOLS/ventoy-${VENTOY_VERSION}"
 if [ ! -d "$VENTOY_DIR" ]; then
     echo -e "${RED}Ventoy not found in $VENTOY_DIR${NC}"
     exit 1
@@ -106,6 +115,7 @@ echo -e "${GREEN}✓ Mounted ${USB}1${NC}"
 mkdir -p /mnt/sonic/ISOS/{Ubuntu,Minimal,Rescue}
 mkdir -p /mnt/sonic/RaspberryPi
 mkdir -p /mnt/sonic/ventoy
+mkdir -p /mnt/sonic/LOGS
 
 # Copy Ubuntu ISOs
 echo ""

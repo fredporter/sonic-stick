@@ -31,6 +31,10 @@ Sonic Stick (SONIC label)
 
 ## Quick Start
 
+### One-command launcher (Ubuntu)
+- Click-to-run: `gnome-terminal -- bash -lc "cd ~/Code/sonic-stick && ./scripts/sonic-stick.sh"`
+- CLI: `sudo ./scripts/sonic-stick.sh` (menu to download payloads, install/upgrade Ventoy, reflash, rebuild, scan, collect logs)
+
 ### 1. Download payloads (30–60 min)
 ```bash
 bash scripts/download-payloads.sh
@@ -72,19 +76,25 @@ sonic-stick/
 ├── .gitignore                   # Excludes large ISO/payloads
 ├── docs/
 │   ├── overview.md              # Project goals & architecture
-│   ├── partition-scheme.md      # 5-partition layout + security dongle setup
-│   ├── bios.md                  # UEFI/BIOS boot configuration
-│   ├── logging.md               # Boot logging & key storage
-│   ├── ventoy-config.md         # Menu customization
-│   └── runbook-ubuntu.md        # Manual install reference
+│   ├── QUICK-START.md           # Short build walkthrough
+│   ├── partition-scheme.md      # Current partitioning plan
+│   ├── ventoy-usage.md          # How to boot and navigate Ventoy
+│   └── logging-and-debugging.md # How to capture and share logs
 ├── config/
 │   └── ventoy/
 │       └── ventoy.json.example  # Sample Ventoy menu config
 ├── scripts/
+│   ├── collect-logs.sh          # Build/boot support bundle collector
 │   ├── download-payloads.sh     # Fetch ISOs (wget-based)
 │   ├── install-ventoy.sh        # Install/upgrade Ventoy
+│   ├── sonic-stick.sh           # Unified launcher/menu (Ubuntu-friendly)
 │   ├── reflash-complete.sh      # Full reflash + partitioning workflow
-│   └── tinycore-bootlog.sh      # Boot logging hook for TinyCore
+│   ├── rebuild-from-scratch.sh  # Full wipe + rebuild with data partition
+│   ├── create-data-partition.sh # Add SONIC_DATA partition
+│   ├── setup-data-partition-guided.sh # GParted-guided data partition
+│   ├── scan-library.sh          # Generate ISO catalog
+│   ├── tinycore-bootlog.sh      # Boot logging hook for TinyCore
+│   └── lib/logging.sh           # Shared logging helpers
 ├── ISOS/                        # (empty; populated by download script)
 │   ├── Ubuntu/
 │   ├── Rescue/
@@ -92,6 +102,14 @@ sonic-stick/
 ├── RaspberryPi/                 # (empty; populated by download script)
 └── TOOLS/                       # (empty; populated by download script)
 ```
+
+## Logging & Debugging
+
+- All major scripts now tee output to `LOGS/<script>-<timestamp>.log`. If the stick is mounted, logs are written to `/media/$USER/SONIC/LOGS`; otherwise they land in the repo `LOGS/` folder.
+- Turn on shell tracing with `DEBUG=1` (for example `DEBUG=1 sudo bash scripts/reflash-complete.sh`).
+- Collect a support bundle after a failing boot: `sudo bash scripts/collect-logs.sh /dev/sdX` (replace `/dev/sdX` with your stick). The bundle includes `lsblk`, `blkid`, `dmesg` tail, Ventoy config/version, and data-partition logs without copying ISOs.
+- TinyCore boots can append hardware/dmesg info to the stick via `scripts/tinycore-bootlog.sh`, writing `LOGS/boot.log` (prefers `SONIC_DATA` when mounted).
+- Details and what to attach when filing issues are in [docs/logging-and-debugging.md](docs/logging-and-debugging.md).
 
 ## Requirements
 
@@ -101,6 +119,7 @@ sonic-stick/
 - wget (for downloads)
 - GParted (for partitioning)
 - ~150 GB free disk space (for downloads)
+- Ventoy version pinned to 1.1.10 (auto-downloaded by launcher or download script)
 
 **To boot the stick:**
 - Any UEFI PC (x86_64)

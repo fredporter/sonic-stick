@@ -7,7 +7,14 @@
 # Example: sudo bash scripts/create-data-partition.sh /dev/sdb
 #
 
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+source "${SCRIPT_DIR}/lib/logging.sh"
+init_logging "create-data-partition"
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 # Colors
 RED='\033[0;31m'
@@ -15,6 +22,8 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+log_info "Starting data partition creation"
 
 if [[ $EUID -ne 0 ]]; then
    echo -e "${RED}This script must be run as root (use sudo)${NC}"

@@ -7,7 +7,14 @@
 # Example: bash scripts/scan-library.sh /mnt/sonic-data
 #
 
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+source "${SCRIPT_DIR}/lib/logging.sh"
+init_logging "scan-library"
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 DATA_MOUNT="${1:-/mnt/sonic-data}"
 VENTOY_MOUNT="${2:-/media/$USER/Ventoy}"
@@ -17,6 +24,8 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+
+log_info "Starting library scan"
 
 echo -e "${BLUE}═══════════════════════════════════════${NC}"
 echo -e "${BLUE}Sonic Stick Library Scanner${NC}"

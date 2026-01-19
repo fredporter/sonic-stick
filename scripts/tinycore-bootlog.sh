@@ -8,6 +8,12 @@
 #
 
 MOUNTPOINT="/media/SONIC"
+
+# Prefer SONIC_DATA if mounted (ext4 is safer for logs)
+if [[ -d "/media/SONIC_DATA" ]]; then
+  MOUNTPOINT="/media/SONIC_DATA"
+fi
+
 LOGFILE="$MOUNTPOINT/LOGS/boot.log"
 
 # Try to find exFAT mount
