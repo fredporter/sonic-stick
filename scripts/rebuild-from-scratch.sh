@@ -39,13 +39,14 @@ echo -e "${MAGENTA}╔═══════════════════�
 echo -e "${MAGENTA}║         SONIC STICK - COMPLETE REBUILD FROM SCRATCH       ║${NC}"
 echo -e "${MAGENTA}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${YELLOW}This will:${NC}"
+echo -e "${MAGENTA}This will:${NC}"
 echo "  1. WIPE all data on $USB"
 echo "  2. Install fresh Ventoy bootloader"
 echo "  3. Copy all ISOs with organized structure"
 echo "  4. Install custom Ventoy menu with organized categories"
-echo "  5. Create FLASH partition for logs/tracking"
-echo "  6. Initialize library catalog system"
+echo "  5. Relabel main partition to SONIC"
+echo "  6. Create FLASH partition for logs/tracking (4GB ext4)"
+echo "  7. Initialize library catalog system"
 echo ""
 echo -e "${RED}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${RED}WARNING: ALL DATA ON $USB WILL BE PERMANENTLY ERASED!${NC}"
@@ -189,45 +190,81 @@ sync
 umount /mnt/sonic
 echo -e "${GREEN}✓ ISOs and config installed${NC}"
 
-# Step 5: Shrink partition 1 and create data partition
+# Relabel partition 1 to SONIC
 echo ""
-echo -e "${BLUE}[5/7] Creating FLASH partition...${NC}"
-echo -e "${YELLOW}Shrinking Ventoy partition to make room for data partition${NC}"
+echo -e "${BLUE}[5/7] Relabeling partition to SONIC...${NC}"
+if command -v exfatlabel &>/dev/null; then
+    exfatlabel "${USB}1" "SONIC" && echo -e "${GREEN}✓ Partition relabeled to SONIC${NC}" || echo -e "${YELLOW}⚠ Could not relabel (exfatlabel not found)${NC}"
+elif command -v fatlabel &>/dev/null; then
+    # Try with fatlabel as fallback (may not work on exFAT)
+    fatlabel "${USB}1" "SONIC" 2>/dev/null && echo -e "${GREEN}✓ Partition relabeled to SONIC${NC}" || echo -e "${YELLOW}⚠ Could not relabel partition${NC}"
+else
+    echo -e "${YELLOW}⚠ exfatlabel not found, partition will remain labeled as Ventoy${NC}"
+    echo -e "${YELLOW}  Install exfatprogs: sudo apt install exfatprogs${NC}"
+fi
 
-# Get current size of partition 1
-CURRENT_SIZE=$(parted -s "$USB" unit MB print | grep "^ 1" | awk '{print $4}' | sed 's/MB//')
-NEW_SIZE=$((CURRENT_SIZE - 4096))  # Leave 4GB for data partition
+# Step 6: Shrink partition 1 and create FLASH data partition
+echo ""
+echo -e "${BLUE}[6/7] Creating FLASH data partition...${NC}"
+echo -e "${YELLOW}This will shrink the Ventoy partition and create a 4GB ext4 partition${NC}"
 
-echo "  Current size: ${CURRENT_SIZE}MB"
-echo "  New size: ${NEW_SIZE}MB"
-echo "  Data partition: ~4GB"
-
-# Resize partition 1
-echo "  Resizing partition 1..."
-parted -s "$USB" resizepart 1 ${NEW_SIZE}MB || {
-    echo -e "${YELLOW}  ⚠ Resize failed, continuing without data partition${NC}"
+# Check if exfatprogs is installed (needed for resize)
+if ! command -v exfatresize &>/dev/null; then
+    echo -e "${YELLOW}⚠ exfatresize not found - cannot create data partition${NC}"
+    echo -e "${YELLOW}  Install it with: sudo apt install exfatprogs${NC}"
+    echo -e "${YELLOW}  Continuing without data partition...${NC}"
     NEW_SIZE=0
-}
+else
+    # Get current size of partition 1 in MB
+    CURRENT_SIZE=$(parted -s "$USB" unit MB print | grep "^ 1" | awk '{print $4}' | sed 's/MB//')
+    DATA_SIZE=4096  # 4GB for data partition
+    NEW_SIZE=$((CURRENT_SIZE - DATA_SIZE))
+
+    echo "  Current partition size: ${CURRENT_SIZE}MB"
+    echo "  New Ventoy partition size: ${NEW_SIZE}MB"
+    echo "  FLASH partition size: ${DATA_SIZE}MB (~4GB)"
+    echo ""
+    
+    # First shrink the exFAT filesystem
+    echo "  Shrinking exFAT filesystem..."
+    exfatresize -s $((NEW_SIZE * 1024 * 1024)) "${USB}1" || {
+        echo -e "${YELLOW}  ⚠ Filesystem resize failed, continuing without data partition${NC}"
+        NEW_SIZE=0
+    }
+    
+    if [ "$NEW_SIZE" -gt 0 ]; then
+        # Now resize the partition
+        echo "  Resizing partition table..."
+        parted -s "$USB" resizepart 1 ${NEW_SIZE}MB || {
+            echo -e "${YELLOW}  ⚠ Partition resize failed${NC}"
+            NEW_SIZE=0
+        }
+    fi
+fi
 
 if [ "$NEW_SIZE" -gt 0 ]; then
     # Create partition 3 (data)
-    echo "  Creating partition 3..."
+    echo ""
+    echo "  Creating partition 3 for FLASH data..."
     parted -s "$USB" mkpart primary ext4 ${NEW_SIZE}MB 100% || {
         echo -e "${YELLOW}  ⚠ Could not create partition 3${NC}"
+        NEW_SIZE=0
     }
+fi
     
+if [ "$NEW_SIZE" -gt 0 ]; then
     sleep 2
     partprobe "$USB" 2>/dev/null || true
     sleep 2
     
     # Format partition 3
     if [ -b "${USB}3" ]; then
-        echo "  Formatting ${USB}3 as ext4..."
+        echo "  Formatting ${USB}3 as ext4 with label FLASH..."
         mkfs.ext4 -F -L "FLASH" "${USB}3"
         
-        # Step 6: Initialize data partition
+        # Step 7: Initialize data partition
         echo ""
-        echo -e "${BLUE}[6/7] Initializing FLASH partition...${NC}"
+        echo -e "${BLUE}[7/7] Initializing FLASH partition...${NC}"
         mkdir -p /mnt/sonic-data
         mount "${USB}3" /mnt/sonic-data
         
@@ -279,15 +316,20 @@ EOF
         sync
         umount /mnt/sonic-data
         
-        echo -e "${GREEN}✓ Data partition initialized${NC}"
+        echo -e "${GREEN}✓ FLASH data partition initialized${NC}"
     else
-        echo -e "${YELLOW}⚠ Partition ${USB}3 not created${NC}"
+        echo -e "${YELLOW}⚠ Partition ${USB}3 not found${NC}"
     fi
+else
+    echo ""
+    echo -e "${YELLOW}⚠ Skipping FLASH partition creation${NC}"
+    echo -e "${YELLOW}  You can create it manually later with:${NC}"
+    echo -e "${YELLOW}  sudo bash scripts/create-data-partition.sh${NC}"
 fi
 
-# Step 7: Final verification
+# Step 8: Final verification
 echo ""
-echo -e "${BLUE}[7/7] Final verification...${NC}"
+echo -e "${BLUE}[8/8] Final verification...${NC}"
 sleep 1
 
 echo ""
