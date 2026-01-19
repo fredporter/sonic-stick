@@ -75,8 +75,26 @@ echo ""
 echo -e "${BLUE}[2/7] Wiping disk and installing fresh Ventoy...${NC}"
 echo -e "${YELLOW}This will take 30-60 seconds...${NC}"
 
-# Find Ventoy installation
+# Prepare Ventoy (download/extract if needed)
 VENTOY_DIR="$BASE_DIR/TOOLS/ventoy-${VENTOY_VERSION}"
+VENTOY_TAR="$BASE_DIR/TOOLS/ventoy-${VENTOY_VERSION}-linux.tar.gz"
+
+if [ ! -d "$VENTOY_DIR" ]; then
+    if [ ! -f "$VENTOY_TAR" ]; then
+        echo -e "${YELLOW}Downloading Ventoy ${VENTOY_VERSION}...${NC}"
+        mkdir -p "$BASE_DIR/TOOLS"
+        wget -O "$VENTOY_TAR" "https://github.com/ventoy/Ventoy/releases/download/v${VENTOY_VERSION}/ventoy-${VENTOY_VERSION}-linux.tar.gz" || {
+            echo -e "${RED}Failed to download Ventoy${NC}"
+            exit 1
+        }
+    fi
+    echo -e "${BLUE}Extracting Ventoy ${VENTOY_VERSION}...${NC}"
+    tar -xzf "$VENTOY_TAR" -C "$BASE_DIR/TOOLS" || {
+        echo -e "${RED}Failed to extract Ventoy${NC}"
+        exit 1
+    }
+fi
+
 if [ ! -d "$VENTOY_DIR" ]; then
     echo -e "${RED}Ventoy not found in $VENTOY_DIR${NC}"
     exit 1
