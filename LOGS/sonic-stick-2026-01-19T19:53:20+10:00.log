@@ -1,0 +1,274 @@
+[2026-01-19T19:53:20+10:00] [INFO] Logging to /home/wizard/Code/sonic-stick/LOGS/sonic-stick-2026-01-19T19:53:20+10:00.log
+[2026-01-19T19:53:20+10:00] [INFO] ============================================
+[2026-01-19T19:53:20+10:00] [INFO] ============================================
+[2026-01-19T19:53:20+10:00] [INFO] Sonic Stick Launcher v1.0.0.6
+[2026-01-19T19:53:20+10:00] [INFO] Sonic Stick Launcher v1.0.0.6
+[2026-01-19T19:53:20+10:00] [INFO] ============================================
+[2026-01-19T19:53:20+10:00] [INFO] ============================================
+[2026-01-19T19:53:20+10:00] [INFO] Target USB device: /dev/sdb (override with USB=/dev/sdX)
+[2026-01-19T19:53:20+10:00] [INFO] Target USB device: /dev/sdb (override with USB=/dev/sdX)
+[2026-01-19T19:53:20+10:00] [INFO] Ventoy version: 1.1.10
+[2026-01-19T19:53:20+10:00] [INFO] Ventoy version: 1.1.10
+[2026-01-19T19:53:20+10:00] [INFO] Repo: /home/wizard/Code/sonic-stick
+[2026-01-19T19:53:20+10:00] [INFO] Repo: /home/wizard/Code/sonic-stick
+
+Select an action:
+  1) Download payloads (ISOs, Ventoy, Pi images)
+  2) Install/Upgrade Ventoy only
+  3) Rebuild from scratch (wipe, copy ISOs, create FLASH)
+  4) Verify stick (check structure, config, offer fixes)
+  5) Quit
+
+Choice [1-5]: [2026-01-19T19:53:23+10:00] [INFO] ============================================
+[2026-01-19T19:53:23+10:00] [INFO] ============================================
+[2026-01-19T19:53:23+10:00] [INFO] Rebuild from scratch
+[2026-01-19T19:53:23+10:00] [INFO] Rebuild from scratch
+[2026-01-19T19:53:23+10:00] [INFO] ============================================
+[2026-01-19T19:53:23+10:00] [INFO] ============================================
+[2026-01-19T19:53:23+10:00] [INFO] Logging to /home/wizard/Code/sonic-stick/LOGS/sonic-stick-2026-01-19T19:53:20+10:00.log
+[2026-01-19T19:53:23+10:00] [INFO] Logging to /home/wizard/Code/sonic-stick/LOGS/sonic-stick-2026-01-19T19:53:20+10:00.log
+[2026-01-19T19:53:23+10:00] [INFO] Starting complete rebuild on /dev/sdb
+[2026-01-19T19:53:23+10:00] [INFO] Starting complete rebuild on /dev/sdb
+[2026-01-19T19:53:23+10:00] [INFO] Starting complete rebuild on /dev/sdb
+[2026-01-19T19:53:23+10:00] [INFO] Environment snapshot:
+[2026-01-19T19:53:23+10:00] [INFO] Environment snapshot:
+[2026-01-19T19:53:23+10:00] [INFO] Environment snapshot:
+[2026-01-19T19:53:23+10:00] [INFO] uname: Linux wizard-dell-server 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-01-19T19:53:23+10:00] [INFO] uname: Linux wizard-dell-server 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-01-19T19:53:23+10:00] [INFO] uname: Linux wizard-dell-server 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-01-19T19:53:23+10:00] [INFO] lsblk: NAME     SIZE FSTYPE   LABEL;loop0      4K squashfs ;loop1   74.3M squashfs ;loop2   73.9M squashfs ;loop3  271.2M squashfs ;loop4  251.6M squashfs ;loop5  505.1M squashfs ;loop6  531.4M squashfs ;loop7   91.7M squashfs ;loop8   12.9M squashfs ;loop9   12.2M squashfs ;loop10  38.8M squashfs ;loop11  48.1M squashfs ;loop12   500K squashfs ;loop13   576K squashfs ;sda    238.5G          ;├─sda1   512M vfat     ;└─sda2   238G ext4     ;sdb    114.6G          ;├─sdb1 114.6G exfat    Ventoy;└─sdb2    32M vfat     VTOYEFI;sr0     1024M          ;
+[2026-01-19T19:53:23+10:00] [INFO] lsblk: NAME     SIZE FSTYPE   LABEL;loop0      4K squashfs ;loop1   74.3M squashfs ;loop2   73.9M squashfs ;loop3  271.2M squashfs ;loop4  251.6M squashfs ;loop5  505.1M squashfs ;loop6  531.4M squashfs ;loop7   91.7M squashfs ;loop8   12.9M squashfs ;loop9   12.2M squashfs ;loop10  38.8M squashfs ;loop11  48.1M squashfs ;loop12   500K squashfs ;loop13   576K squashfs ;sda    238.5G          ;├─sda1   512M vfat     ;└─sda2   238G ext4     ;sdb    114.6G          ;├─sdb1 114.6G exfat    Ventoy;└─sdb2    32M vfat     VTOYEFI;sr0     1024M          ;
+[2026-01-19T19:53:23+10:00] [INFO] lsblk: NAME     SIZE FSTYPE   LABEL;loop0      4K squashfs ;loop1   74.3M squashfs ;loop2   73.9M squashfs ;loop3  271.2M squashfs ;loop4  251.6M squashfs ;loop5  505.1M squashfs ;loop6  531.4M squashfs ;loop7   91.7M squashfs ;loop8   12.9M squashfs ;loop9   12.2M squashfs ;loop10  38.8M squashfs ;loop11  48.1M squashfs ;loop12   500K squashfs ;loop13   576K squashfs ;sda    238.5G          ;├─sda1   512M vfat     ;└─sda2   238G ext4     ;sdb    114.6G          ;├─sdb1 114.6G exfat    Ventoy;└─sdb2    32M vfat     VTOYEFI;sr0     1024M          ;
+[2026-01-19T19:53:23+10:00] [INFO] df: Filesystem      Size  Used Avail Mounted on;tmpfs           764M  2.1M  762M /run;/dev/sda2       234G   33G  189G /;tmpfs           3.8G   27M  3.8G /dev/shm;tmpfs           5.0M  4.0K  5.0M /run/lock;efivarfs        256K  102K  150K /sys/firmware/efi/efivars;/dev/sda1       511M  6.1M  505M /boot/efi;tmpfs           764M  112K  764M /run/user/1000;
+[2026-01-19T19:53:23+10:00] [INFO] df: Filesystem      Size  Used Avail Mounted on;tmpfs           764M  2.1M  762M /run;/dev/sda2       234G   33G  189G /;tmpfs           3.8G   27M  3.8G /dev/shm;tmpfs           5.0M  4.0K  5.0M /run/lock;efivarfs        256K  102K  150K /sys/firmware/efi/efivars;/dev/sda1       511M  6.1M  505M /boot/efi;tmpfs           764M  112K  764M /run/user/1000;
+[2026-01-19T19:53:23+10:00] [INFO] df: Filesystem      Size  Used Avail Mounted on;tmpfs           764M  2.1M  762M /run;/dev/sda2       234G   33G  189G /;tmpfs           3.8G   27M  3.8G /dev/shm;tmpfs           5.0M  4.0K  5.0M /run/lock;efivarfs        256K  102K  150K /sys/firmware/efi/efivars;/dev/sda1       511M  6.1M  505M /boot/efi;tmpfs           764M  112K  764M /run/user/1000;
+[H[2J[3J[H[2J[3J[0;35m╔════════════════════════════════════════════════════════════╗[0m
+[0;35m╔════════════════════════════════════════════════════════════╗[0m
+[0;35m║         SONIC STICK - COMPLETE REBUILD FROM SCRATCH       ║[0m
+[0;35m║         SONIC STICK - COMPLETE REBUILD FROM SCRATCH       ║[0m
+[0;35m╚════════════════════════════════════════════════════════════╝[0m
+
+[0;35m╚════════════════════════════════════════════════════════════╝[0m
+
+[0;35mThis will:[0m
+  1. WIPE all data on /dev/sdb
+  2. Install fresh Ventoy bootloader
+[0;35mThis will:[0m
+  1. WIPE all data on /dev/sdb
+  2. Install fresh Ventoy bootloader
+  3. Copy all ISOs with organized structure
+  4. Install custom Ventoy menu with organized categories
+  5. Relabel main partition to SONIC
+  3. Copy all ISOs with organized structure
+  4. Install custom Ventoy menu with organized categories
+  5. Relabel main partition to SONIC
+  6. Create FLASH partition for logs/tracking (4GB ext4)
+  7. Initialize library catalog system
+
+[0;31m═══════════════════════════════════════════════════════════[0m
+  6. Create FLASH partition for logs/tracking (4GB ext4)
+  7. Initialize library catalog system
+
+[0;31m═══════════════════════════════════════════════════════════[0m
+[0;31mWARNING: ALL DATA ON /dev/sdb WILL BE PERMANENTLY ERASED![0m
+[0;31mWARNING: ALL DATA ON /dev/sdb WILL BE PERMANENTLY ERASED![0m
+[0;31m═══════════════════════════════════════════════════════════[0m
+
+[0;31m═══════════════════════════════════════════════════════════[0m
+
+NAME     SIZE TYPE FSTYPE LABEL   MOUNTPOINT
+sdb    114.6G disk                
+├─sdb1 114.6G part exfat  Ventoy  
+└─sdb2    32M part vfat   VTOYEFI 
+NAME     SIZE TYPE FSTYPE LABEL   MOUNTPOINT
+sdb    114.6G disk                
+├─sdb1 114.6G part exfat  Ventoy  
+└─sdb2    32M part vfat   VTOYEFI 
+
+Type 'REBUILD' in capitals to continue: 
+Type 'REBUILD' in capitals to continue: 
+
+[0;34m[1/7] Unmounting all partitions on /dev/sdb...[0m
+[0;34m[1/7] Unmounting all partitions on /dev/sdb...[0m
+
+[0;34m[2/7] Wiping disk and installing fresh Ventoy...[0m
+
+[1;33mThis will take 30-60 seconds...[0m
+[0;34m[2/7] Wiping disk and installing fresh Ventoy...[0m
+[1;33mThis will take 30-60 seconds...[0m
+
+  Pre-wiping existing signatures...
+
+  Pre-wiping existing signatures...
+/dev/sdb: 8 bytes were erased at offset 0x00000200 (gpt): 45 46 49 20 50 41 52 54
+/dev/sdb: 8 bytes were erased at offset 0x1ca63ffe00 (gpt): 45 46 49 20 50 41 52 54
+/dev/sdb: 2 bytes were erased at offset 0x000001fe (PMBR): 55 aa
+/dev/sdb: calling ioctl to re-read partition table: Success
+/dev/sdb: 8 bytes were erased at offset 0x00000200 (gpt): 45 46 49 20 50 41 52 54
+/dev/sdb: 8 bytes were erased at offset 0x1ca63ffe00 (gpt): 45 46 49 20 50 41 52 54
+/dev/sdb: 2 bytes were erased at offset 0x000001fe (PMBR): 55 aa
+/dev/sdb: calling ioctl to re-read partition table: Success
+Creating new GPT entries in memory.
+GPT data structures destroyed! You may now partition the disk using fdisk or
+other utilities.
+Creating new GPT entries in memory.
+GPT data structures destroyed! You may now partition the disk using fdisk or
+other utilities.
+Patching Ventoy for better partition detection...
+Patching Ventoy for better partition detection...
+✓ Ventoy patched
+✓ Ventoy patched
+
+**********************************************
+      Ventoy: 1.1.10  x86_64
+      longpanda admin@ventoy.net
+      https://www.ventoy.net
+**********************************************
+
+
+**********************************************
+      Ventoy: 1.1.10  x86_64
+      longpanda admin@ventoy.net
+      https://www.ventoy.net
+**********************************************
+
+Disk : /dev/sdb
+Disk : /dev/sdb
+Model:  USB  SanDisk 3.2Gen1 (scsi)
+Model:  USB  SanDisk 3.2Gen1 (scsi)
+Size : 114 GiB
+Style: GPT
+
+
+Size : 114 GiB
+Style: GPT
+
+
+[33mAttention:[0m
+[33mYou will install Ventoy to /dev/sdb.[0m
+[33mAll the data on the disk /dev/sdb will be lost!!![0m
+
+[33mAttention:[0m
+[33mYou will install Ventoy to /dev/sdb.[0m
+[33mAll the data on the disk /dev/sdb will be lost!!![0m
+
+
+[33mAll the data on the disk /dev/sdb will be lost!!![0m
+
+[33mAll the data on the disk /dev/sdb will be lost!!![0m
+
+Create partitions on /dev/sdb by parted in GPT style ...
+
+Create partitions on /dev/sdb by parted in GPT style ...
+Done
+Wait for partitions ...
+Done
+Wait for partitions ...
+partition exist OK
+create efi fat fs /dev/sdb2 ...
+partition exist OK
+create efi fat fs /dev/sdb2 ...
+mkfs.fat 4.2 (2021-01-31)
+mkfs.fat 4.2 (2021-01-31)
+success
+success
+Wait for partitions /dev/sdb1 and /dev/sdb2 ...
+Wait for partitions /dev/sdb1 and /dev/sdb2 ...
+/dev/sdb1 exist OK
+/dev/sdb1 exist OK
+/dev/sdb2 exist OK
+partition exist OK
+[32mFormat partition 1 /dev/sdb1 ...[0m
+/dev/sdb2 exist OK
+partition exist OK
+[32mFormat partition 1 /dev/sdb1 ...[0m
+mkexfatfs 1.3.0
+Creating... mkexfatfs 1.3.0
+Creating... done.
+Flushing... done.
+Flushing... done.
+File system created successfully.
+done.
+File system created successfully.
+mkexfatfs success
+mkexfatfs success
+[32mwriting data to disk ...[0m
+[32mwriting data to disk ...[0m
+[32msync data ...[0m
+[32msync data ...[0m
+[32mesp partition processing ...[0m
+
+[32mesp partition processing ...[0m
+
+[32mInstall Ventoy to /dev/sdb successfully finished.[0m
+
+[32mInstall Ventoy to /dev/sdb successfully finished.[0m
+
+[2026-01-19T19:53:39+10:00] [INFO] Ventoy install log: /home/wizard/Code/sonic-stick/LOGS/ventoy-install-2026-01-19T19:53:23+10:00.log
+[2026-01-19T19:53:39+10:00] [INFO] Ventoy install log: /home/wizard/Code/sonic-stick/LOGS/ventoy-install-2026-01-19T19:53:23+10:00.log
+[2026-01-19T19:53:39+10:00] [INFO] Ventoy install log: /home/wizard/Code/sonic-stick/LOGS/ventoy-install-2026-01-19T19:53:23+10:00.log
+Forcing kernel partition table reread...
+Forcing kernel partition table reread...
+Verifying partition table...
+Verifying partition table...
+Waiting for partition device nodes to appear...
+Waiting for partition device nodes to appear...
+Waiting for /dev/sdb1 and /dev/sdb2 (max 60s)...
+Waiting for /dev/sdb1 and /dev/sdb2 (max 60s)...
+✓ Partitions detected: /dev/sdb1 and /dev/sdb2
+✓ Partitions detected: /dev/sdb1 and /dev/sdb2
+Detecting Ventoy partitions...
+Detecting Ventoy partitions...
+SONIC label not found, searching for exFAT partition...
+SONIC label not found, searching for exFAT partition...
+✓ Found exFAT partition: /dev/sdb1
+✓ Found exFAT partition: /dev/sdb1
+[2026-01-19T19:53:45+10:00] [INFO] ✓ Using data partition: /dev/sdb1
+[2026-01-19T19:53:45+10:00] [INFO] ✓ Using data partition: /dev/sdb1
+[2026-01-19T19:53:45+10:00] [INFO] ✓ Using data partition: /dev/sdb1
+Verifying SONIC partition filesystem...
+Verifying SONIC partition filesystem...
+[2026-01-19T19:53:45+10:00] [INFO] Relabeling partition to SONIC...
+[2026-01-19T19:53:45+10:00] [INFO] Relabeling partition to SONIC...
+[2026-01-19T19:53:45+10:00] [INFO] Relabeling partition to SONIC...
+exfatprogs version : 1.2.2
+new label: SONIC
+exfatprogs version : 1.2.2
+new label: SONIC
+
+[0;34m[3/7] Mounting Ventoy partition and copying ISOs...[0m
+
+[0;34m[3/7] Mounting Ventoy partition and copying ISOs...[0m
+[0;32m✓ Mounted /dev/sdb1[0m
+[0;32m✓ Mounted /dev/sdb1[0m
+
+Copying Ubuntu ISOs...
+
+Copying Ubuntu ISOs...
+  → ubuntu-22.04.5-desktop-amd64.iso
+  → ubuntu-22.04.5-desktop-amd64.iso
+sending incremental file list
+sending incremental file list
+ubuntu-22.04.5-desktop-amd64.iso
+ubuntu-22.04.5-desktop-amd64.iso
+         32.77K   0%    0.00kB/s    0:00:00           32.77K   0%    0.00kB/s    0:00:00          424.25M   8%  404.56MB/s    0:00:10          424.25M   8%  404.56MB/s    0:00:10          846.04M  17%  403.41MB/s    0:00:09          846.04M  17%  403.41MB/s    0:00:09            1.04G  21%  330.80MB/s    0:00:10            1.04G  21%  330.80MB/s    0:00:10            1.17G  24%  279.13MB/s    0:00:12            1.17G  24%  279.13MB/s    0:00:12            1.28G  26%  203.41MB/s    0:00:16            1.28G  26%  203.41MB/s    0:00:16            1.37G  28%  125.31MB/s    0:00:26            1.37G  28%  125.31MB/s    0:00:26            1.45G  30%   97.15MB/s    0:00:33            1.45G  30%   97.15MB/s    0:00:33            1.51G  31%   79.90MB/s    0:00:39            1.51G  31%   79.90MB/s    0:00:39            1.55G  32%   64.79MB/s    0:00:48            1.55G  32%   64.79MB/s    0:00:48            1.59G  33%   51.62MB/s    0:01:00            1.59G  33%   51.62MB/s    0:01:00            1.63G  34%   42.56MB/s    0:01:11            1.63G  34%   42.56MB/s    0:01:11            1.67G  35%   39.06MB/s    0:01:17            1.67G  35%   39.06MB/s    0:01:17            1.72G  36%   39.76MB/s    0:01:14            1.72G  36%   39.76MB/s    0:01:14            1.77G  37%   42.57MB/s    0:01:08            1.77G  37%   42.57MB/s    0:01:08            1.81G  37%   43.07MB/s    0:01:06            1.81G  37%   43.07MB/s    0:01:06            1.86G  38%   43.72MB/s    0:01:04            1.86G  38%   43.72MB/s    0:01:04            1.90G  39%   42.48MB/s    0:01:05            1.90G  39%   42.48MB/s    0:01:05            1.94G  40%   41.16MB/s    0:01:06            1.94G  40%   41.16MB/s    0:01:06            1.98G  41%   41.50MB/s    0:01:05            1.98G  41%   41.50MB/s    0:01:05            2.02G  42%   39.79MB/s    0:01:07            2.02G  42%   39.79MB/s    0:01:07            2.06G  43%   39.92MB/s    0:01:06            2.06G  43%   39.92MB/s    0:01:06            2.11G  44%   39.37MB/s    0:01:05            2.11G  44%   39.37MB/s    0:01:05            2.15G  45%   40.88MB/s    0:01:02            2.15G  45%   40.88MB/s    0:01:02            2.20G  46%   43.27MB/s    0:00:57            2.20G  46%   43.27MB/s    0:00:57            2.26G  47%   45.51MB/s    0:00:53            2.26G  47%   45.51MB/s    0:00:53            2.31G  48%   48.40MB/s    0:00:49            2.31G  48%   48.40MB/s    0:00:49            2.37G  49%   50.45MB/s    0:00:46            2.37G  49%   50.45MB/s    0:00:46            2.43G  50%   52.94MB/s    0:00:43            2.43G  50%   52.94MB/s    0:00:43            2.49G  52%   54.79MB/s    0:00:40            2.49G  52%   54.79MB/s    0:00:40            2.54G  53%   55.36MB/s    0:00:39            2.54G  53%   55.36MB/s    0:00:39            2.60G  54%   56.24MB/s    0:00:37            2.60G  54%   56.24MB/s    0:00:37            2.67G  56%   57.38MB/s    0:00:35            2.67G  56%   57.38MB/s    0:00:35            2.73G  57%   58.54MB/s    0:00:33            2.73G  57%   58.54MB/s    0:00:33            2.79G  58%   59.41MB/s    0:00:32            2.79G  58%   59.41MB/s    0:00:32            2.85G  59%   58.41MB/s    0:00:32            2.85G  59%   58.41MB/s    0:00:32            2.91G  61%   57.19MB/s    0:00:31            2.91G  61%   57.19MB/s    0:00:31            2.96G  62%   54.80MB/s    0:00:32            2.96G  62%   54.80MB/s    0:00:32            3.02G  63%   53.54MB/s    0:00:31            3.02G  63%   53.54MB/s    0:00:31            3.07G  64%   53.10MB/s    0:00:31            3.07G  64%   53.10MB/s    0:00:31            3.13G  65%   52.61MB/s    0:00:30            3.13G  65%   52.61MB/s    0:00:30            3.19G  66%   53.55MB/s    0:00:28            3.19G  66%   53.55MB/s    0:00:28            3.24G  68%   53.80MB/s    0:00:27            3.24G  68%   53.80MB/s    0:00:27            3.30G  69%   54.19MB/s    0:00:26            3.30G  69%   54.19MB/s    0:00:26            3.36G  70%   54.62MB/s    0:00:25            3.36G  70%   54.62MB/s    0:00:25            3.41G  71%   54.09MB/s    0:00:24            3.41G  71%   54.09MB/s    0:00:24            3.47G  72%   52.91MB/s    0:00:23            3.47G  72%   52.91MB/s    0:00:23            3.51G  73%   50.64MB/s    0:00:24            3.51G  73%   50.64MB/s    0:00:24            3.56G  74%   47.48MB/s    0:00:24            3.56G  74%   47.48MB/s    0:00:24            3.60G  75%   43.86MB/s    0:00:25            3.60G  75%   43.86MB/s    0:00:25            3.64G  76%   41.23MB/s    0:00:26            3.64G  76%   41.23MB/s    0:00:26            3.68G  77%   38.85MB/s    0:00:27            3.68G  77%   38.85MB/s    0:00:27            3.71G  77%   35.71MB/s    0:00:28            3.71G  77%   35.71MB/s    0:00:28            3.74G  78%   34.44MB/s    0:00:28            3.74G  78%   34.44MB/s    0:00:28            3.78G  79%   32.71MB/s    0:00:29            3.78G  79%   32.71MB/s    0:00:29            3.81G  79%   31.91MB/s    0:00:29            3.81G  79%   31.91MB/s    0:00:29            3.84G  80%   31.78MB/s    0:00:28            3.84G  80%   31.78MB/s    0:00:28            3.87G  81%   30.68MB/s    0:00:28            3.87G  81%   30.68MB/s    0:00:28            3.91G  82%   30.85MB/s    0:00:27            3.91G  82%   30.85MB/s    0:00:27            3.94G  82%   30.57MB/s    0:00:26            3.94G  82%   30.57MB/s    0:00:26            3.97G  83%   31.19MB/s    0:00:24            3.97G  83%   31.19MB/s    0:00:24            4.01G  84%   31.69MB/s    0:00:23            4.01G  84%   31.69MB/s    0:00:23            4.04G  84%   31.78MB/s    0:00:22            4.04G  84%   31.78MB/s    0:00:22            4.07G  85%   32.27MB/s    0:00:20            4.07G  85%   32.27MB/s    0:00:20            4.11G  86%   32.07MB/s    0:00:19            4.11G  86%   32.07MB/s    0:00:19            4.14G  86%   32.36MB/s    0:00:18            4.14G  86%   32.36MB/s    0:00:18            4.18G  87%   32.58MB/s    0:00:17            4.18G  87%   32.58MB/s    0:00:17            4.21G  88%   32.59MB/s    0:00:16            4.21G  88%   32.59MB/s    0:00:16            4.25G  89%   32.88MB/s    0:00:15            4.25G  89%   32.88MB/s    0:00:15            4.28G  89%   32.47MB/s    0:00:14            4.28G  89%   32.47MB/s    0:00:14            4.31G  90%   32.21MB/s    0:00:13            4.31G  90%   32.21MB/s    0:00:13            4.35G  91%   32.00MB/s    0:00:12            4.35G  91%   32.00MB/s    0:00:12            4.38G  91%   31.69MB/s    0:00:11            4.38G  91%   31.69MB/s    0:00:11            4.41G  92%   32.03MB/s    0:00:10            4.41G  92%   32.03MB/s    0:00:10            4.45G  93%   32.03MB/s    0:00:09            4.45G  93%   32.03MB/s    0:00:09            4.48G  94%   32.47MB/s    0:00:08            4.48G  94%   32.47MB/s    0:00:08            4.52G  94%   32.78MB/s    0:00:07            4.52G  94%   32.78MB/s    0:00:07            4.55G  95%   33.33MB/s    0:00:06            4.55G  95%   33.33MB/s    0:00:06            4.59G  96%   34.07MB/s    0:00:04            4.59G  96%   34.07MB/s    0:00:04            4.62G  97%   33.90MB/s    0:00:03            4.62G  97%   33.90MB/s    0:00:03            4.66G  97%   33.99MB/s    0:00:02            4.66G  97%   33.99MB/s    0:00:02            4.69G  98%   33.49MB/s    0:00:02            4.69G  98%   33.49MB/s    0:00:02            4.73G  99%   33.13MB/s    0:00:00            4.73G  99%   33.13MB/s    0:00:00            4.76G 100%   54.65MB/s    0:01:23 (xfr#1, to-chk=0/1)
+          4.76G 100%   54.65MB/s    0:01:23 (xfr#1, to-chk=0/1)
+rsync: [receiver] chown "/mnt/sonic/ISOS/Ubuntu/.ubuntu-22.04.5-desktop-amd64.iso.TOPVO7" failed: Operation not permitted (1)
+rsync: [receiver] chown "/mnt/sonic/ISOS/Ubuntu/.ubuntu-22.04.5-desktop-amd64.iso.TOPVO7" failed: Operation not permitted (1)
+rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1338) [sender=3.2.7]
+rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1338) [sender=3.2.7]
+[2026-01-19T19:55:12+10:00] [ERROR] Command failed (exit 23) at line 395: rsync -ah --progress "$iso" /mnt/sonic/ISOS/Ubuntu/
+[2026-01-19T19:55:12+10:00] [ERROR] Command failed (exit 23) at line 395: rsync -ah --progress "$iso" /mnt/sonic/ISOS/Ubuntu/
+[2026-01-19T19:55:12+10:00] [ERROR] Command failed (exit 23) at line 395: rsync -ah --progress "$iso" /mnt/sonic/ISOS/Ubuntu/
+[2026-01-19T19:55:12+10:00] [WARN] Rebuild failed or cancelled
+[2026-01-19T19:55:12+10:00] [WARN] Rebuild failed or cancelled
+Press Enter to continue...
+Select an action:
+  1) Download payloads (ISOs, Ventoy, Pi images)
+  2) Install/Upgrade Ventoy only
+  3) Rebuild from scratch (wipe, copy ISOs, create FLASH)
+  4) Verify stick (check structure, config, offer fixes)
+  5) Quit
+
+Choice [1-5]: [2026-01-19T20:01:57+10:00] [OK] Done
+[2026-01-19T20:01:57+10:00] [OK] Done

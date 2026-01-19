@@ -392,7 +392,7 @@ if [ -d "$BASE_DIR/ISOS/Ubuntu" ] && ls "$BASE_DIR"/ISOS/Ubuntu/*.iso &>/dev/nul
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -ah --progress "$iso" /mnt/sonic/ISOS/Ubuntu/
+            rsync -rh --progress "$iso" /mnt/sonic/ISOS/Ubuntu/
         elif command -v pv &>/dev/null; then
             pv "$iso" > "/mnt/sonic/ISOS/Ubuntu/$filename"
         else
@@ -411,7 +411,7 @@ if [ -d "$BASE_DIR/ISOS/Minimal" ] && ls "$BASE_DIR"/ISOS/Minimal/*.iso &>/dev/n
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -ah --progress "$iso" /mnt/sonic/ISOS/Minimal/
+            rsync -rh --progress "$iso" /mnt/sonic/ISOS/Minimal/
         elif command -v pv &>/dev/null; then
             pv "$iso" > "/mnt/sonic/ISOS/Minimal/$filename"
         else
@@ -430,7 +430,7 @@ if [ -d "$BASE_DIR/ISOS/Rescue" ] && ls "$BASE_DIR"/ISOS/Rescue/*.iso &>/dev/nul
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -ah --progress "$iso" /mnt/sonic/ISOS/Rescue/
+            rsync -rh --progress "$iso" /mnt/sonic/ISOS/Rescue/
         elif command -v pv &>/dev/null; then
             pv "$iso" > "/mnt/sonic/ISOS/Rescue/$filename"
         else
@@ -449,7 +449,7 @@ if [ -d "$BASE_DIR/RaspberryPi" ] && ls "$BASE_DIR"/RaspberryPi/*.img.xz &>/dev/
         filename=$(basename "$img")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -ah --progress "$img" /mnt/sonic/RaspberryPi/
+            rsync -rh --progress "$img" /mnt/sonic/RaspberryPi/
         elif command -v pv &>/dev/null; then
             pv "$img" > "/mnt/sonic/RaspberryPi/$filename"
         else
