@@ -40,58 +40,165 @@ verify_stick() {
   echo ""
   lsblk -o NAME,SIZE,FSTYPE,LABEL "$USB" 2>/dev/null || fdisk -l "$USB" | head -15
   
-  # Check for Ventoy partition
+  # Track issues
+  ISSUES=()
+  HAS_VENTOY=0
+  HAS_SONIC=0
+  HAS_FLASH=0
+  HAS_VENTOY_JSON=0
+  ISO_COUNT=0
+  
+  # Check for Ventoy bootloader (VTOYEFI partition)
   echo ""
-  if blkid "$USB"* 2>/dev/null | grep -i "VTOY\|VENTOY" >/dev/null; then
-    log_ok "✓ Ventoy bootloader detected"
+  if blkid "$USB"* 2>/dev/null | grep -i "VTOYEFI" >/dev/null; then
+    log_ok "✓ Ventoy bootloader (VTOYEFI) detected"
+    HAS_VENTOY=1
   else
-    log_warn "⚠ Ventoy not detected - may need reinstall"
+    log_error "✗ Ventoy bootloader not detected"
+    ISSUES+=("no_ventoy")
+  fi
+  
+  # Check for SONIC label on partition 1
+  echo ""
+  PART1_LABEL=$(blkid -s LABEL -o value "${USB}1" 2>/dev/null || echo "")
+  if [[ "$PART1_LABEL" == "SONIC" ]]; then
+    log_ok "✓ SONIC main partition found (${USB}1)"
+    HAS_SONIC=1
+  elif [[ "$PART1_LABEL" == "Ventoy" ]]; then
+    log_warn "⚠ Main partition labeled 'Ventoy' (should be 'SONIC')"
+    ISSUES+=("wrong_label")
+  else
+    log_warn "⚠ Main partition has unexpected label: '$PART1_LABEL'"
+    ISSUES+=("wrong_label")
   fi
   
   # Check for FLASH partition
   echo ""
   if blkid "$USB"* 2>/dev/null | grep -i "FLASH" >/dev/null; then
-    log_ok "✓ FLASH data partition found"
     FLASH_PART=$(blkid -L FLASH 2>/dev/null)
-    if [[ -n "$FLASH_PART" ]]; then
-      log_info "  Partition: $FLASH_PART"
-    fi
+    log_ok "✓ FLASH data partition found ($FLASH_PART)"
+    HAS_FLASH=1
   else
-    log_warn "⚠ FLASH partition not found"
+    log_warn "⚠ FLASH partition not found (optional)"
+    ISSUES+=("no_flash")
   fi
   
-  # Check for SONIC partition
+  # Check ventoy.json and ISOs
   echo ""
-  if blkid "$USB"* 2>/dev/null | grep -i "SONIC" >/dev/null; then
-    log_ok "✓ SONIC main partition found"
-  else
-    log_warn "⚠ SONIC partition not found"
-  fi
-  
-  # Try to verify ventoy.json if we can mount
-  echo ""
-  log_info "Attempting to check ventoy.json..."
+  log_info "Checking configuration and ISOs..."
   TEMP_MNT=$(mktemp -d)
   if mount "${USB}1" "$TEMP_MNT" 2>/dev/null; then
+    # Check ventoy.json
     if [[ -f "$TEMP_MNT/ventoy/ventoy.json" ]]; then
       if python3 -m json.tool "$TEMP_MNT/ventoy/ventoy.json" >/dev/null 2>&1; then
         log_ok "✓ ventoy.json is valid"
+        HAS_VENTOY_JSON=1
       else
         log_error "✗ ventoy.json has syntax errors"
+        ISSUES+=("bad_json")
       fi
     else
       log_warn "⚠ ventoy.json not found"
+      ISSUES+=("no_json")
     fi
+    
+    # Count ISOs
+    if [[ -d "$TEMP_MNT/ISOS" ]]; then
+      ISO_COUNT=$(find "$TEMP_MNT/ISOS" -name "*.iso" 2>/dev/null | wc -l)
+      if [[ $ISO_COUNT -gt 0 ]]; then
+        log_ok "✓ Found $ISO_COUNT ISO(s) ready to boot"
+      else
+        log_warn "⚠ No ISOs found in ISOS directory"
+        ISSUES+=("no_isos")
+      fi
+    else
+      log_warn "⚠ ISOS directory not found"
+      ISSUES+=("no_isos")
+    fi
+    
     umount "$TEMP_MNT" 2>/dev/null || true
   else
-    log_warn "⚠ Could not mount partition for verification"
+    log_error "✗ Could not mount ${USB}1 for verification"
+    ISSUES+=("cant_mount")
   fi
   rm -rf "$TEMP_MNT"
   
   # Show summary
   echo ""
-  log_section "Verification Complete"
-  echo "✓ Stick appears functional - ready to boot!"
+  log_section "Verification Summary"
+  
+  if [[ ${#ISSUES[@]} -eq 0 ]]; then
+    echo -e "\033[0;32m"
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║              ✓ STICK IS PERFECTLY CONFIGURED!             ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
+    echo -e "\033[0m"
+    echo "✓ Ventoy bootloader installed"
+    echo "✓ SONIC partition labeled correctly"
+    echo "✓ FLASH data partition present"
+    echo "✓ ventoy.json configured"
+    echo "✓ $ISO_COUNT ISO(s) ready to boot"
+    echo ""
+    echo "Your stick is ready to use!"
+    return 0
+  else
+    echo -e "\033[1;33m"
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║                  ⚠ ISSUES DETECTED                        ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
+    echo -e "\033[0m"
+    
+    # List issues
+    for issue in "${ISSUES[@]}"; do
+      case "$issue" in
+        no_ventoy) echo "✗ Ventoy not installed" ;;
+        wrong_label) echo "⚠ Partition labeled '$PART1_LABEL' (should be 'SONIC')" ;;
+        no_flash) echo "⚠ FLASH partition missing (optional)" ;;
+        no_json) echo "⚠ ventoy.json not configured" ;;
+        bad_json) echo "✗ ventoy.json has errors" ;;
+        no_isos) echo "⚠ No ISOs found" ;;
+        cant_mount) echo "✗ Cannot mount main partition" ;;
+      esac
+    done
+    
+    echo ""
+    echo "Recommended actions:"
+    
+    # Suggest appropriate fix
+    if [[ " ${ISSUES[*]} " =~ " no_ventoy " ]] || [[ " ${ISSUES[*]} " =~ " cant_mount " ]]; then
+      echo "  → Full rebuild required (Ventoy not properly installed)"
+      echo ""
+      read -rp "Run full rebuild now? [y/N]: " response
+      if [[ "$response" =~ ^[Yy]$ ]]; then
+        USB="$USB" VENTOY_VERSION="$VENTOY_VERSION_DEFAULT" bash "$SCRIPT_DIR/rebuild-from-scratch.sh"
+        return $?
+      fi
+    elif [[ " ${ISSUES[*]} " =~ " wrong_label " ]] && [[ ${#ISSUES[@]} -eq 1 || (${#ISSUES[@]} -eq 2 && " ${ISSUES[*]} " =~ " no_flash ") ]]; then
+      echo "  → Quick fix: Just relabel partition to SONIC"
+      echo ""
+      read -rp "Relabel partition now? [y/N]: " response
+      if [[ "$response" =~ ^[Yy]$ ]]; then
+        bash "$SCRIPT_DIR/relabel-sonic.sh"
+        return $?
+      fi
+    else
+      echo "  → Run 'Fix Ventoy error' (option 7) to repair configuration"
+      echo "  → Or run 'Rebuild from scratch' (option 4) for complete reset"
+      echo ""
+      read -rp "Fix now? (7=fix config, 4=rebuild, N=skip): " response
+      case "$response" in
+        7)
+          USB="$USB" bash "$SCRIPT_DIR/fix-ventoy-stick.sh"
+          return $?
+          ;;
+        4)
+          USB="$USB" VENTOY_VERSION="$VENTOY_VERSION_DEFAULT" bash "$SCRIPT_DIR/rebuild-from-scratch.sh"
+          return $?
+          ;;
+      esac
+    fi
+  fi
+  
   echo ""
 }
 
