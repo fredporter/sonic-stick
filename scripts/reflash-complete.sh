@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Sonic Stick Complete Reflash Workflow
-# Installs Ventoy, copies ISOs, and guides partitioning
+# Installs Ventoy, copies ISOs, configures custom menu, and creates data partition
 #
 # Usage: sudo bash scripts/reflash-complete.sh
 #
@@ -9,15 +9,24 @@
 set -e
 
 USB="/dev/sdb"  # Edit this to your USB device
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
 # Confirm setup
-echo "=========================================="
-echo "Sonic Stick Complete Reflash Workflow"
-echo "=========================================="
+echo -e "${BLUE}==========================================${NC}"
+echo -e "${BLUE}Sonic Stick Complete Reflash Workflow${NC}"
+echo -e "${BLUE}==========================================${NC}"
 echo "Target USB: $USB"
 echo ""
 lsblk "$USB" 2>/dev/null | head -10
 echo ""
+echo -e "${RED}WARNING: This will ERASE all data on $USB${NC}"
 read -p "Type 'ERASE' to continue: " confirm
 if [[ "$confirm" != "ERASE" ]]; then
   echo "Cancelled."
@@ -26,81 +35,129 @@ fi
 
 # Step 1: Install Ventoy
 echo ""
-echo "[Step 1/4] Installing Ventoy..."
-sudo bash scripts/install-ventoy.sh
+echo -e "${BLUE}[Step 1/5] Installing Ventoy...${NC}"
+sudo bash "$BASE_DIR/scripts/install-ventoy.sh"
 sleep 2
 
-# Step 2: Mount and copy ISOs
+# Step 2: Mount and copy ISOs + custom config
 echo ""
-echo "[Step 2/4] Copying ISOs to USB..."
+echo -e "${BLUE}[Step 2/5] Copying ISOs and config to USB...${NC}"
 sudo mkdir -p /mnt/sonic
-if sudo mount "${USB}2" /mnt/sonic; then
-  echo "Mounted ${USB}2 at /mnt/sonic"
+if sudo mount "${USB}1" /mnt/sonic; then
+  echo "Mounted ${USB}1 at /mnt/sonic"
   
   # Create ISO directories
-  sudo mkdir -p /mnt/sonic/{ISOS,RaspberryPi,LOGS}
+  sudo mkdir -p /mnt/sonic/ISOS/{Ubuntu,Minimal,Rescue}
+  sudo mkdir -p /mnt/sonic/RaspberryPi
+  sudo mkdir -p /mnt/sonic/ventoy
   
   # Copy payloads
-  if [[ -d "ISOS" ]]; then
-    echo "Copying ISOS..."
-    sudo cp -rv ISOS/* /mnt/sonic/ISOS/ 2>/dev/null | tail -3
+  if [[ -d "$BASE_DIR/ISOS/Ubuntu" ]]; then
+    echo "Copying Ubuntu ISOs..."
+    sudo cp -v "$BASE_DIR"/ISOS/Ubuntu/*.iso /mnt/sonic/ISOS/Ubuntu/ 2>/dev/null || echo "  (No Ubuntu ISOs found)"
   fi
   
-  if [[ -d "RaspberryPi" ]]; then
+  if [[ -d "$BASE_DIR/ISOS/Minimal" ]]; then
+    echo "Copying Minimal ISOs..."
+    sudo cp -v "$BASE_DIR"/ISOS/Minimal/*.iso /mnt/sonic/ISOS/Minimal/ 2>/dev/null || echo "  (No Minimal ISOs found)"
+  fi
+  
+  if [[ -d "$BASE_DIR/ISOS/Rescue" ]]; then
+    echo "Copying Rescue ISOs..."
+    sudo cp -v "$BASE_DIR"/ISOS/Rescue/*.iso /mnt/sonic/ISOS/Rescue/ 2>/dev/null || echo "  (No Rescue ISOs found)"
+  fi
+  
+  if [[ -d "$BASE_DIR/RaspberryPi" ]]; then
     echo "Copying RaspberryPi images..."
-    sudo cp -rv RaspberryPi/* /mnt/sonic/RaspberryPi/ 2>/dev/null | tail -3
+    sudo cp -v "$BASE_DIR"/RaspberryPi/*.img.xz /mnt/sonic/RaspberryPi/ 2>/dev/null || echo "  (No RPi images found)"
+  fi
+  
+  # Copy custom Ventoy configuration
+  if [[ -f "$BASE_DIR/config/ventoy/ventoy.json" ]]; then
+    echo -e "${GREEN}Installing custom Ventoy menu...${NC}"
+    sudo mkdir -p /mnt/sonic/ventoy
+    sudo cp -v "$BASE_DIR/config/ventoy/ventoy.json" /mnt/sonic/ventoy/
   fi
   
   sudo umount /mnt/sonic
   echo "Unmounted USB"
 else
-  echo "ERROR: Failed to mount ${USB}2"
+  echo -e "${RED}ERROR: Failed to mount ${USB}1${NC}"
   exit 1
 fi
 
-# Step 3: Boot test
+
+# Step 3: Create data partition
 echo ""
-echo "[Step 3/4] Boot test (optional)"
-read -p "Insert USB and reboot to test Ventoy menu? (y/n): " boottest
+echo -e "${BLUE}[Step 3/5] Creating SONIC_DATA partition...${NC}"
+echo "This partition will store logs, session data, and library tracking"
+sleep 1
+
+if bash "$BASE_DIR/scripts/create-data-partition.sh" "$USB"; then
+  echo -e "${GREEN}✓ Data partition created${NC}"
+else
+  echo -e "${YELLOW}⚠ Data partition creation failed (may already exist)${NC}"
+fi
+
+# Step 4: Initialize library catalog
+echo ""
+echo -e "${BLUE}[Step 4/5] Initializing library catalog...${NC}"
+sudo mkdir -p /mnt/sonic-data
+if sudo mount "${USB}3" /mnt/sonic-data 2>/dev/null; then
+  echo "Running library scan..."
+  sudo mount "${USB}1" /mnt/sonic 2>/dev/null || true
+  bash "$BASE_DIR/scripts/scan-library.sh" /mnt/sonic-data /mnt/sonic || echo "Scan will run on first boot"
+  sudo umount /mnt/sonic 2>/dev/null || true
+  sudo umount /mnt/sonic-data
+  echo -e "${GREEN}✓ Library initialized${NC}"
+else
+  echo -e "${YELLOW}⚠ Data partition not yet created${NC}"
+fi
+
+# Step 5: Boot test
+echo ""
+echo -e "${BLUE}[Step 5/5] Ready for boot test${NC}"
+
+# Step 5: Boot test
+echo ""
+echo -e "${BLUE}[Step 5/5] Ready for boot test${NC}"
+read -p "Reboot to test Ventoy menu? (y/n): " boottest
 if [[ "$boottest" == "y" ]]; then
+  echo ""
+  echo -e "${GREEN}Boot Test Instructions:${NC}"
   echo "1. Reboot your machine"
   echo "2. Press F12 or ESC at startup to select USB boot"
-  echo "3. Verify Ventoy menu appears with ISOs"
-  echo "4. Test booting TinyCore and Ubuntu installer"
+  echo "3. You should see the custom Ventoy menu with:"
+  echo "   • Ubuntu 22.04.5 LTS Desktop"
+  echo "   • Lubuntu 22.04.5 LTS"
+  echo "   • Ubuntu MATE 22.04.5 LTS"
+  echo "   • Alpine Linux 3.19.1"
+  echo "   • TinyCore Pure64 15.0"
+  echo ""
+  echo -e "${YELLOW}Tips:${NC}"
+  echo "   • ISOs marked 'installer+live' can run without installing"
+  echo "   • Use arrow keys to navigate the menu"
+  echo "   • Press ESC to return to previous menu"
+  echo ""
   read -p "Press Enter when done with boot test..."
 fi
 
-# Step 4: Partitioning with GParted
 echo ""
-echo "[Step 4/4] Partitioning USB (GParted)"
+echo -e "${GREEN}==========================================${NC}"
+echo -e "${GREEN}Reflash workflow complete!${NC}"
+echo -e "${GREEN}==========================================${NC}"
 echo ""
-echo "You will now partition the USB stick:"
-echo "  1. Shrink exFAT from ~114GB to ~82GB"
-echo "  2. Create ext4 partition (16GB, label: TCE)"
-echo "  3. Create linux-swap (8GB, label: SONIC_SWAP)"
-echo "  4. Create ext4 partition (2GB, label: DONGLE)"
+echo "USB Stick Configuration:"
+lsblk "$USB" -o NAME,SIZE,FSTYPE,LABEL
 echo ""
-read -p "Start GParted? (y/n): " gparted
-if [[ "$gparted" == "y" ]]; then
-  if command -v gparted &> /dev/null; then
-    sudo gparted "$USB" &
-  else
-    echo "GParted not installed. Install with: sudo apt install gparted"
-    exit 1
-  fi
-fi
+echo -e "${BLUE}What you can do now:${NC}"
+echo "  1. Boot from USB - Custom menu with all ISOs"
+echo "  2. View library - bash scripts/scan-library.sh"
+echo "  3. Check logs - mount SONIC_DATA partition"
+echo ""
+echo -e "${YELLOW}Troubleshooting:${NC}"
+echo "  • No menu items? - Remount USB and check /mnt/sonic/ISOS/"
+echo "  • Boot fails? - Check BIOS boot order (USB first)"
+echo "  • Missing ISOs? - Run: bash scripts/download-payloads.sh"
+echo ""
 
-echo ""
-echo "=========================================="
-echo "Reflash workflow complete!"
-echo "=========================================="
-echo ""
-echo "After GParted:"
-echo "  sudo lsblk $USB"
-echo "  # Verify all 5 partitions exist"
-echo ""
-echo "Mount DONGLE partition (optional):"
-echo "  sudo mkdir -p /mnt/dongle"
-echo "  sudo mount ${USB}5 /mnt/dongle"
-echo "  # Store SSH keys, GPG certs, BIOS backups"
-echo ""

@@ -1,0 +1,78 @@
+{
+  "control": [
+    {
+      "VTOY_DEFAULT_SEARCH_ROOT": "/ISOS"
+    },
+    {
+      "VTOY_MENU_TIMEOUT": "30"
+    },
+    {
+      "VTOY_DEFAULT_MENU_MODE": "1"
+    },
+    {
+      "VTOY_FILT_DOT_UNDERSCORE_FILE": "1"
+    }
+  ],
+  
+  "theme": {
+    "file": "/ventoy/theme/theme.txt",
+    "display_mode": "GUI",
+    "ventoy_left": "5%",
+    "ventoy_top": "95%",
+    "ventoy_color": "#00ff00"
+  },
+
+  "menu_alias": [
+    {
+      "image": "/ISOS/Ubuntu/ubuntu-22.04.5-desktop-amd64.iso",
+      "alias": "Ubuntu 22.04.5 LTS Desktop (Installer)"
+    },
+    {
+      "image": "/ISOS/Ubuntu/lubuntu-22.04.5-desktop-amd64.iso",
+      "alias": "Lubuntu 22.04.5 LTS (Lightweight Installer)"
+    },
+    {
+      "image": "/ISOS/Ubuntu/ubuntu-mate-22.04.5-desktop-amd64.iso",
+      "alias": "Ubuntu MATE 22.04.5 LTS (Installer)"
+    },
+    {
+      "image": "/ISOS/Minimal/alpine-standard-3.19.1-x86_64.iso",
+      "alias": "Alpine Linux 3.19.1 (Live + Installer)"
+    },
+    {
+      "image": "/ISOS/Rescue/CorePure64-15.0.iso",
+      "alias": "TinyCore Pure64 15.0 (Recovery Tool)"
+    }
+  ],
+
+  "menu_tip": {
+    "/ISOS/Ubuntu/ubuntu-22.04.5-desktop-amd64.iso": "Full-featured Ubuntu desktop. Try live or install to disk. Requires 4GB RAM minimum.",
+    "/ISOS/Ubuntu/lubuntu-22.04.5-desktop-amd64.iso": "Lightweight Ubuntu with LXDE. Good for older hardware. 2GB RAM minimum.",
+    "/ISOS/Ubuntu/ubuntu-mate-22.04.5-desktop-amd64.iso": "Traditional desktop with MATE. Balanced performance. 4GB RAM recommended.",
+    "/ISOS/Minimal/alpine-standard-3.19.1-x86_64.iso": "Minimal Linux. Boot live, then run 'setup-alpine' to install. 512MB RAM minimum.",
+    "/ISOS/Rescue/CorePure64-15.0.iso": "Ultra-minimal rescue system. Boot from RAM. Perfect for troubleshooting."
+  },
+
+  "menu_class": [
+    {
+      "key": "ubuntu",
+      "class": "ubuntu"
+    },
+    {
+      "key": "lubuntu",
+      "class": "lubuntu"
+    },
+    {
+      "key": "mate",
+      "class": "ubuntu"
+    },
+    {
+      "key": "alpine",
+      "class": "alpine"
+    },
+    {
+      "key": "Core",
+      "class": "tinycore"
+    }
+  ]
+}
