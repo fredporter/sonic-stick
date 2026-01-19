@@ -392,7 +392,8 @@ if [ -d "$BASE_DIR/ISOS/Ubuntu" ] && ls "$BASE_DIR"/ISOS/Ubuntu/*.iso &>/dev/nul
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -rh --progress "$iso" /mnt/sonic/ISOS/Ubuntu/
+            # exFAT doesn’t support Unix owners/groups; avoid preserving them
+            rsync -rltD --info=progress2 --no-perms --no-owner --no-group "$iso" /mnt/sonic/ISOS/Ubuntu/
         elif command -v pv &>/dev/null; then
             pv "$iso" > "/mnt/sonic/ISOS/Ubuntu/$filename"
         else
@@ -411,7 +412,7 @@ if [ -d "$BASE_DIR/ISOS/Minimal" ] && ls "$BASE_DIR"/ISOS/Minimal/*.iso &>/dev/n
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -rh --progress "$iso" /mnt/sonic/ISOS/Minimal/
+            rsync -rltD --info=progress2 --no-perms --no-owner --no-group "$iso" /mnt/sonic/ISOS/Minimal/
         elif command -v pv &>/dev/null; then
             pv "$iso" > "/mnt/sonic/ISOS/Minimal/$filename"
         else
@@ -430,7 +431,7 @@ if [ -d "$BASE_DIR/ISOS/Rescue" ] && ls "$BASE_DIR"/ISOS/Rescue/*.iso &>/dev/nul
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -rh --progress "$iso" /mnt/sonic/ISOS/Rescue/
+            rsync -rltD --info=progress2 --no-perms --no-owner --no-group "$iso" /mnt/sonic/ISOS/Rescue/
         elif command -v pv &>/dev/null; then
             pv "$iso" > "/mnt/sonic/ISOS/Rescue/$filename"
         else
@@ -449,7 +450,7 @@ if [ -d "$BASE_DIR/RaspberryPi" ] && ls "$BASE_DIR"/RaspberryPi/*.img.xz &>/dev/
         filename=$(basename "$img")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -rh --progress "$img" /mnt/sonic/RaspberryPi/
+            rsync -rltD --info=progress2 --no-perms --no-owner --no-group "$img" /mnt/sonic/RaspberryPi/
         elif command -v pv &>/dev/null; then
             pv "$img" > "/mnt/sonic/RaspberryPi/$filename"
         else
@@ -501,204 +502,9 @@ else
     echo -e "${YELLOW}  Install exfatprogs: sudo apt install exfatprogs${NC}"
 fi
 
-# Step 6: Shrink partition 1 and create FLASH data partition
+# Final verification (no extra partitions to keep Ventoy GPT intact)
 echo ""
-echo -e "${BLUE}[6/7] Creating FLASH data partition...${NC}"
-echo -e "${YELLOW}This will backup data, repartition, and restore${NC}"
-
-# Get the partition number of the SONIC partition
-SONIC_PART_NUM=$(get_partition_number "$SONIC_PART")
-if [ -z "$SONIC_PART_NUM" ]; then
-    log_error "Could not determine SONIC partition number from $SONIC_PART"
-    exit 1
-fi
-
-# Get current size of SONIC partition in MB
-CURRENT_SIZE=$(parted -s "$USB" unit MB print | grep "^ ${SONIC_PART_NUM}" | awk '{print $4}' | sed 's/MB//')
-DATA_SIZE=4096  # 4GB for data partition
-NEW_SIZE=$((CURRENT_SIZE - DATA_SIZE))
-
-echo "  Current partition size: ${CURRENT_SIZE}MB"
-echo "  New Ventoy partition size: ${NEW_SIZE}MB"
-echo "  FLASH partition size: ${DATA_SIZE}MB (~4GB)"
-echo ""
-
-# Create temporary backup directory
-BACKUP_DIR="/tmp/sonic-backup-$$"
-mkdir -p "$BACKUP_DIR"
-
-echo "  Backing up data from $SONIC_PART..."
-if cp -r /mnt/sonic/* "$BACKUP_DIR/" 2>/dev/null; then
-    echo -e "${GREEN}    ✓ Backup successful${NC}"
-else
-    echo -e "${YELLOW}  ⚠ Backup had issues but continuing...${NC}"
-fi
-
-if [ "$NEW_SIZE" -gt 0 ]; then
-    # Unmount
-    umount /mnt/sonic 2>/dev/null || true
-    
-    # Delete SONIC partition and recreate it smaller
-    echo "  Repartitioning..."
-    parted -s "$USB" rm $SONIC_PART_NUM || {
-        echo -e "${YELLOW}  ⚠ Failed to remove partition${NC}"
-        NEW_SIZE=0
-    }
-fi
-
-if [ "$NEW_SIZE" -gt 0 ]; then
-    parted -s "$USB" mkpart primary 2048s ${NEW_SIZE}MB || {
-        echo -e "${YELLOW}  ⚠ Failed to create partition${NC}"
-        NEW_SIZE=0
-    }
-fi
-
-if [ "$NEW_SIZE" -gt 0 ]; then
-    # Format the new smaller partition
-    echo "  Formatting $SONIC_PART..."
-    sleep 2
-    partprobe "$USB" 2>/dev/null || true
-    sleep 2
-    # Rediscover partition after repartitioning
-    SONIC_PART=$(detect_sonic_partition "$USB")
-    if [ -z "$SONIC_PART" ]; then
-        # Fallback: assume same partition number
-        if [[ "$USB" =~ nvme ]]; then
-            SONIC_PART="${USB}p${SONIC_PART_NUM}"
-        else
-            SONIC_PART="${USB}${SONIC_PART_NUM}"
-        fi
-    fi
-    mkfs.exfat -L "SONIC" "$SONIC_PART" || {
-        echo -e "${YELLOW}  ⚠ Failed to format partition${NC}"
-        NEW_SIZE=0
-    }
-fi
-
-if [ "$NEW_SIZE" -gt 0 ]; then
-    # Restore data
-    echo "  Restoring data..."
-    sleep 1
-    mount "$SONIC_PART" /mnt/sonic
-    
-    # Recreate directory structure
-    mkdir -p /mnt/sonic/ISOS/{Ubuntu,Minimal,Rescue}
-    mkdir -p /mnt/sonic/RaspberryPi
-    mkdir -p /mnt/sonic/ventoy
-    mkdir -p /mnt/sonic/LOGS
-    
-    # Restore files from backup
-    if [ -d "$BACKUP_DIR" ] && [ "$(ls -A "$BACKUP_DIR")" ]; then
-        echo "    Restoring $(find "$BACKUP_DIR" -type f | wc -l) files..."
-        cp -r "$BACKUP_DIR"/* /mnt/sonic/ 2>/dev/null || true
-        echo -e "${GREEN}    ✓ Data restored${NC}"
-    fi
-    sync
-fi
-
-# Cleanup backup
-rm -rf "$BACKUP_DIR"
-
-if [ "$NEW_SIZE" -gt 0 ]; then
-    # Create partition 3 (data)
-    echo ""
-    echo "  Creating partition 3 for FLASH data..."
-    parted -s "$USB" mkpart primary ${NEW_SIZE}MB 100% || {
-        echo -e "${YELLOW}  ⚠ Could not create partition 3${NC}"
-        NEW_SIZE=0
-    }
-fi
-    
-if [ "$NEW_SIZE" -gt 0 ]; then
-    sleep 2
-    partprobe "$USB" 2>/dev/null || true
-    sleep 2
-    
-    # Detect the new FLASH partition (should be the last partition)
-    FLASH_PART=$(detect_flash_partition "$USB")
-    if [ -z "$FLASH_PART" ]; then
-        # Find the last partition number and assume it's the FLASH partition
-        for part in ${USB}*[0-9] ${USB}p*[0-9]; do
-            if [ -b "$part" ]; then
-                FLASH_PART="$part"
-            fi
-        done
-    fi
-    
-    # Format FLASH partition
-    if [ -n "$FLASH_PART" ] && [ -b "$FLASH_PART" ]; then
-        echo "  Formatting $FLASH_PART as ext4 with label FLASH..."
-        mkfs.ext4 -F -L "FLASH" "$FLASH_PART"
-        
-        # Step 7: Initialize data partition
-        echo ""
-        echo -e "${BLUE}[7/7] Initializing FLASH partition...${NC}"
-        mkdir -p /mnt/sonic-data
-        mount "$FLASH_PART" /mnt/sonic-data
-        
-        # Create directory structure
-        mkdir -p /mnt/sonic-data/{logs,sessions,library,devices,config}
-        
-        # Create initial catalog
-        cat > /mnt/sonic-data/library/iso-catalog.json << EOF
-{
-  "last_updated": "$(date -Iseconds)",
-  "total_isos": $ISO_COUNT,
-  "auto_scan": true
-}
-EOF
-        
-        # Create config
-        cat > /mnt/sonic-data/config/sonic-stick.conf << EOF
-# Sonic Stick Configuration
-STICK_NAME="SONIC"
-VERSION="2.0"
-BUILD_DATE="$(date -Iseconds)"
-AUTO_SCAN=true
-LOG_BOOTS=true
-EOF
-        
-        # Create README
-        cat > /mnt/sonic-data/README.txt << EOF
-╔══════════════════════════════════════════════════════════════╗
-║              SONIC STICK - DATA PARTITION                    ║
-╚══════════════════════════════════════════════════════════════╝
-
-This partition stores persistent data across boots:
-
-  • logs/       - Boot and system logs
-  • sessions/   - Session data from live boots
-  • library/    - ISO catalog and tracking
-  • devices/    - Hardware detection logs
-  • config/     - Sonic Stick configuration
-
-Label: FLASH
-Filesystem: ext4
-Created: $(date)
-ISO Count: $ISO_COUNT
-
-This partition is separate from the Ventoy bootloader and your ISOs.
-EOF
-        
-        chmod -R 755 /mnt/sonic-data
-        sync
-        umount /mnt/sonic-data
-        
-        FLASH_DONE=1
-        echo -e "${GREEN}✓ FLASH data partition initialized${NC}"
-    else
-        echo -e "${YELLOW}⚠ Could not find FLASH partition after creation${NC}"
-    fi
-else
-    echo ""
-    echo -e "${YELLOW}⚠ Skipping FLASH partition creation${NC}"
-    echo -e "${YELLOW}  You can create it manually later with:${NC}"
-    echo -e "${YELLOW}  sudo bash scripts/create-data-partition.sh${NC}"
-fi
-
-# Step 8: Final verification
-echo ""
-echo -e "${BLUE}[8/8] Final verification...${NC}"
+echo -e "${BLUE}[6/6] Final verification...${NC}"
 sleep 1
 
 echo ""
@@ -711,12 +517,6 @@ lsblk "$USB" -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT
 echo ""
 echo -e "${GREEN}✓ $ISO_COUNT ISOs ready to boot${NC}"
 echo -e "${GREEN}✓ Custom Ventoy menu installed${NC}"
-if [ "$FLASH_DONE" -eq 1 ]; then
-    echo -e "${GREEN}✓ FLASH data partition ready${NC}"
-else
-    echo -e "${RED}✗ FLASH data partition missing (this build is incomplete)${NC}"
-    exit 1
-fi
 echo ""
 echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${YELLOW}                     NEXT STEPS:${NC}"

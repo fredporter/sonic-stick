@@ -45,7 +45,6 @@ verify_stick() {
   ISSUES=()
   HAS_VENTOY=0
   HAS_SONIC=0
-  HAS_FLASH=0
   HAS_VENTOY_JSON=0
   ISO_COUNT=0
   
@@ -88,17 +87,6 @@ verify_stick() {
   else
     log_error "✗ Could not find SONIC partition"
     ISSUES+=("no_sonic")
-  fi
-  
-  # Check for FLASH partition
-  echo ""
-  FLASH_PART=$(detect_flash_partition "$USB")
-  if [ -n "$FLASH_PART" ]; then
-    log_ok "✓ FLASH data partition found ($FLASH_PART)"
-    HAS_FLASH=1
-  else
-    log_warn "⚠ FLASH partition not found (optional)"
-    ISSUES+=("no_flash")
   fi
   
   # Check ventoy.json and ISOs
@@ -153,7 +141,6 @@ verify_stick() {
     echo -e "\033[0m"
     echo "✓ Ventoy bootloader installed"
     echo "✓ SONIC partition labeled correctly"
-    echo "✓ FLASH data partition present"
     echo "✓ ventoy.json configured"
     echo "✓ $ISO_COUNT ISO(s) ready to boot"
     echo ""
@@ -171,7 +158,6 @@ verify_stick() {
       case "$issue" in
         no_ventoy) echo "✗ Ventoy not installed" ;;
         wrong_label) echo "⚠ Partition labeled '$PART1_LABEL' (should be 'SONIC')" ;;
-        no_flash) echo "⚠ FLASH partition missing (optional)" ;;
         no_json) echo "⚠ ventoy.json not configured" ;;
         bad_json) echo "✗ ventoy.json has errors" ;;
         no_isos) echo "⚠ No ISOs found" ;;
@@ -191,7 +177,7 @@ verify_stick() {
         USB="$USB" VENTOY_VERSION="$VENTOY_VERSION_DEFAULT" bash "$SCRIPT_DIR/rebuild-from-scratch.sh"
         return $?
       fi
-    elif [[ " ${ISSUES[*]} " =~ " wrong_label " ]] && [[ ${#ISSUES[@]} -eq 1 || (${#ISSUES[@]} -eq 2 && " ${ISSUES[*]} " =~ " no_flash ") ]]; then
+    elif [[ " ${ISSUES[*]} " =~ " wrong_label " ]] && [[ ${#ISSUES[@]} -eq 1 ]]; then
       echo "  → Quick fix: Just relabel partition to SONIC"
       echo ""
       read -rp "Relabel partition now? [y/N]: " response
