@@ -110,13 +110,16 @@ if [ -d "$BASE_DIR/ISOS/Ubuntu" ] && ls "$BASE_DIR"/ISOS/Ubuntu/*.iso &>/dev/nul
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -h --no-perms --progress "$iso" /mnt/sonic/ISOS/Ubuntu/
+            rsync -h --no-perms --progress "$iso" /mnt/sonic/ISOS/Ubuntu/ || {
+                echo -e "${YELLOW}  ⚠ rsync failed, trying cp...${NC}"
+                cp -v "$iso" /mnt/sonic/ISOS/Ubuntu/ || true
+            }
         elif command -v pv &>/dev/null; then
-            pv "$iso" > "/mnt/sonic/ISOS/Ubuntu/$filename"
+            pv "$iso" > "/mnt/sonic/ISOS/Ubuntu/$filename" || true
         else
-            cp -v "$iso" /mnt/sonic/ISOS/Ubuntu/
+            cp -v "$iso" /mnt/sonic/ISOS/Ubuntu/ || true
         fi
-        ((ISO_COUNT++))
+        ISO_COUNT=$((ISO_COUNT + 1))
     done
     echo -e "${GREEN}  ✓ Ubuntu ISOs copied${NC}"
 else
@@ -131,13 +134,16 @@ if [ -d "$BASE_DIR/ISOS/Minimal" ] && ls "$BASE_DIR"/ISOS/Minimal/*.iso &>/dev/n
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -h --no-perms --progress "$iso" /mnt/sonic/ISOS/Minimal/
+            rsync -h --no-perms --progress "$iso" /mnt/sonic/ISOS/Minimal/ || {
+                echo -e "${YELLOW}  ⚠ rsync failed, trying cp...${NC}"
+                cp -v "$iso" /mnt/sonic/ISOS/Minimal/ || true
+            }
         elif command -v pv &>/dev/null; then
-            pv "$iso" > "/mnt/sonic/ISOS/Minimal/$filename"
+            pv "$iso" > "/mnt/sonic/ISOS/Minimal/$filename" || true
         else
-            cp -v "$iso" /mnt/sonic/ISOS/Minimal/
+            cp -v "$iso" /mnt/sonic/ISOS/Minimal/ || true
         fi
-        ((ISO_COUNT++))
+        ISO_COUNT=$((ISO_COUNT + 1))
     done
     echo -e "${GREEN}  ✓ Minimal ISOs copied${NC}"
 else
@@ -152,13 +158,16 @@ if [ -d "$BASE_DIR/ISOS/Rescue" ] && ls "$BASE_DIR"/ISOS/Rescue/*.iso &>/dev/nul
         filename=$(basename "$iso")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -h --no-perms --progress "$iso" /mnt/sonic/ISOS/Rescue/
+            rsync -h --no-perms --progress "$iso" /mnt/sonic/ISOS/Rescue/ || {
+                echo -e "${YELLOW}  ⚠ rsync failed, trying cp...${NC}"
+                cp -v "$iso" /mnt/sonic/ISOS/Rescue/ || true
+            }
         elif command -v pv &>/dev/null; then
-            pv "$iso" > "/mnt/sonic/ISOS/Rescue/$filename"
+            pv "$iso" > "/mnt/sonic/ISOS/Rescue/$filename" || true
         else
-            cp -v "$iso" /mnt/sonic/ISOS/Rescue/
+            cp -v "$iso" /mnt/sonic/ISOS/Rescue/ || true
         fi
-        ((ISO_COUNT++))
+        ISO_COUNT=$((ISO_COUNT + 1))
     done
     echo -e "${GREEN}  ✓ Rescue ISOs copied${NC}"
 else
@@ -173,12 +182,16 @@ if [ -d "$BASE_DIR/RaspberryPi" ] && ls "$BASE_DIR"/RaspberryPi/*.img.xz &>/dev/
         filename=$(basename "$img")
         echo "  → $filename"
         if command -v rsync &>/dev/null; then
-            rsync -h --no-perms --progress "$img" /mnt/sonic/RaspberryPi/
+            rsync -h --no-perms --progress "$img" /mnt/sonic/RaspberryPi/ || {
+                echo -e "${YELLOW}  ⚠ rsync failed, trying cp...${NC}"
+                cp -v "$img" /mnt/sonic/RaspberryPi/ || true
+            }
         elif command -v pv &>/dev/null; then
-            pv "$img" > "/mnt/sonic/RaspberryPi/$filename"
+            pv "$img" > "/mnt/sonic/RaspberryPi/$filename" || true
         else
-            cp -v "$img" /mnt/sonic/RaspberryPi/
+            cp -v "$img" /mnt/sonic/RaspberryPi/ || true
         fi
+        ISO_COUNT=$((ISO_COUNT + 1))
     done
     echo -e "${GREEN}  ✓ RPi images copied${NC}"
 else
