@@ -79,7 +79,7 @@ echo -e "${YELLOW}This will take 30-60 seconds...${NC}"
 VENTOY_DIR="$BASE_DIR/TOOLS/ventoy-${VENTOY_VERSION}"
 VENTOY_TAR="$BASE_DIR/TOOLS/ventoy-${VENTOY_VERSION}-linux.tar.gz"
 
-if [ ! -d "$VENTOY_DIR" ]; then
+if [ ! -f "$VENTOY_DIR/Ventoy2Disk.sh" ]; then
     if [ ! -f "$VENTOY_TAR" ]; then
         echo -e "${YELLOW}Downloading Ventoy ${VENTOY_VERSION}...${NC}"
         mkdir -p "$BASE_DIR/TOOLS"
@@ -95,8 +95,8 @@ if [ ! -d "$VENTOY_DIR" ]; then
     }
 fi
 
-if [ ! -d "$VENTOY_DIR" ]; then
-    echo -e "${RED}Ventoy not found in $VENTOY_DIR${NC}"
+if [ ! -f "$VENTOY_DIR/Ventoy2Disk.sh" ]; then
+    echo -e "${RED}Ventoy2Disk.sh not found at $VENTOY_DIR/Ventoy2Disk.sh${NC}"
     exit 1
 fi
 

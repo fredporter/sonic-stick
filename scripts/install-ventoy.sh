@@ -61,7 +61,7 @@ for partition in "${USB}"*; do
 done
 
 # Fetch/extract Ventoy bits if missing
-if [[ ! -d "$VENTOY_DIR" ]]; then
+if [[ ! -f "$VENTOY_DIR/Ventoy2Disk.sh" ]]; then
   if [[ ! -f "$VENTOY_TAR" ]]; then
     log_info "Ventoy $VENTOY_VER not found locally. Downloading..."
     mkdir -p "$(dirname "$VENTOY_TAR")"
@@ -71,8 +71,8 @@ if [[ ! -d "$VENTOY_DIR" ]]; then
   tar -xzf "$VENTOY_TAR" -C "$(dirname "$VENTOY_TAR")"
 fi
 
-if [[ ! -d "$VENTOY_DIR" ]]; then
-  log_error "Failed to prepare Ventoy directory at $VENTOY_DIR"
+if [[ ! -f "$VENTOY_DIR/Ventoy2Disk.sh" ]]; then
+  log_error "Failed to prepare Ventoy script at $VENTOY_DIR/Ventoy2Disk.sh"
   exit 1
 fi
 
