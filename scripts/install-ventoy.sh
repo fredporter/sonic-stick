@@ -43,6 +43,14 @@ fi
 log_section "Ventoy Installer - $MODE mode"
 log_info "Target USB: $USB"
 log_info "Ventoy version: $VENTOY_VER"
+
+# Check for required tools
+if ! command -v mkfs.exfat &>/dev/null && ! command -v mkexfatfs &>/dev/null; then
+  log_error "mkexfatfs/mkfs.exfat not found. Please install exfatprogs:"
+  log_error "  Ubuntu/Debian: sudo apt-get install exfatprogs"
+  exit 1
+fi
+
 lsblk "$USB" 2>/dev/null || fdisk -l "$USB" | head -5 | tee -a "$LOG_FILE"
 read -p "Type 'ERASE' to proceed with $MODE: " confirm
 if [[ "$confirm" != "ERASE" ]]; then
@@ -82,7 +90,22 @@ cd "$VENTOY_DIR"
 log_info "Running Ventoy installer..."
 INSTALL_LOG=$(mktemp)
 if [[ "$MODE" == "install" ]]; then
-  bash Ventoy2Disk.sh -i "$USB" 2>&1 | tee "$INSTALL_LOG" >> "$LOG_FILE" || { log_error "Install failed"; cat "$INSTALL_LOG"; rm -f "$INSTALL_LOG"; exit 1; }
+  bash Ventoy2Disk.sh -i "$USB" 2>&1 | tee "$INSTALL_LOG" >> "$LOG_FILE"
+  RESULT=$?
+  if [[ $RESULT -ne 0 ]]; then
+    # If install failed, check if old Ventoy exists and force reinstall
+    if grep -qi "already contains a Ventoy" "$INSTALL_LOG"; then
+      log_warn "Old Ventoy version detected, forcing reinstall..."
+      bash Ventoy2Disk.sh -I "$USB" 2>&1 | tee "$INSTALL_LOG" >> "$LOG_FILE"
+      RESULT=$?
+    fi
+  fi
+  if [[ $RESULT -ne 0 ]]; then
+    log_error "Install failed"
+    cat "$INSTALL_LOG"
+    rm -f "$INSTALL_LOG"
+    exit 1
+  fi
 elif [[ "$MODE" == "upgrade" ]]; then
   bash Ventoy2Disk.sh -u "$USB" 2>&1 | tee "$INSTALL_LOG" >> "$LOG_FILE" || { log_error "Upgrade failed"; cat "$INSTALL_LOG"; rm -f "$INSTALL_LOG"; exit 1; }
 fi

@@ -1,4 +1,4 @@
-# Sonic Stick Pack v1.0.0.0
+# Sonic Stick Pack v1.0.0.1
 
 **The ultimate multiboot rescue + install USB for Linux sysadmins, makers, and tinkerers.**
 
@@ -22,8 +22,8 @@ Sonic Stick is a Ventoy-powered USB toolkit that boots a custom menu offering re
 📋 **Partition layout (128 GB)**
 ```
 Sonic Stick (SONIC label)
-├─ Partition 1: Ventoy EFI/Boot (32 MB, auto-created)
-├─ Partition 2: Ventoy Data (exFAT, ~82 GB) — ISOs, tools, logs, config
+├─ Partition 1: Ventoy Data (exFAT, ~82 GB) — ISOs, tools, logs, config
+├─ Partition 2: VTOYEFI (FAT16, 32 MB, auto-created) — Ventoy EFI/Boot
 ├─ Partition 3: TCE Persistence (ext4, 16 GB) — TinyCore persistent workspace
 ├─ Partition 4: SONIC_SWAP (8 GB) — virtual RAM for low-memory systems
 └─ Partition 5: DONGLE (ext4, 2 GB) — encrypted key vault + BIOS backups
@@ -69,7 +69,7 @@ sudo bash scripts/reflash-complete.sh
 ### 4. Customize the Ventoy menu (optional)
 ```bash
 sudo mkdir -p /mnt/sonic
-sudo mount /dev/sdb2 /mnt/sonic
+sudo mount /dev/sdb1 /mnt/sonic  # Partition 1 is the main data partition
 sudo cp config/ventoy/ventoy.json.example /mnt/sonic/ventoy/ventoy.json
 sudo nano /mnt/sonic/ventoy/ventoy.json  # Edit menu names & descriptions
 sudo umount /mnt/sonic
@@ -159,7 +159,7 @@ sonic-stick/
 
 ## Contributing
 
-Found a bug? Want to add a feature? 🙌 See [CONTRIBUTING.md](CONTRIBUTING.md).
+Found a bug? Want to add a feature? 🙌 See [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ## License
 

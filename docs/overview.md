@@ -67,4 +67,4 @@ Sonic Stick is a single, portable USB stick that provides:
 
 ## Contributing
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for bug reports, features, and PRs.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports, features, and PRs.

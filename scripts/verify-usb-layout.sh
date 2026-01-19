@@ -16,7 +16,7 @@ fi
 echo "[Info] Partition table:"
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT "${USB_DEVICE}" | sed '1!s/^/  /'
 
-# Expect two partitions: 1=data (exFAT/NTFS), 2=VTOYEFI (FAT)
+# Ventoy creates: 1=data (exFAT/NTFS), 2=VTOYEFI (FAT16)
 DATA_PART="${USB_DEVICE}1"
 EFI_PART="${USB_DEVICE}2"
 

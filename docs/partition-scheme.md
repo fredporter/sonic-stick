@@ -6,13 +6,15 @@ This document details the complete USB stick layout and security dongle setup.
 
 | Part | Device | Size | Type | Label | Purpose |
 |------|--------|------|------|-------|---------|
-| 1 | sdb1 | 32 MB | EFI | Ventoy | Boot firmware |
-| 2 | sdb2 | ~82 GB | exFAT | SONIC | ISOs, tools, logs |
+| 1 | sdb1 | ~82 GB | exFAT | SONIC | ISOs, tools, logs (Ventoy data) |
+| 2 | sdb2 | 32 MB | FAT16 | VTOYEFI | Ventoy EFI/Boot firmware |
 | 3 | sdb3 | 16 GB | ext4 | TCE | TinyCore persistence |
 | 4 | sdb4 | 8 GB | linux-swap | SONIC_SWAP | Virtual RAM |
 | 5 | sdb5 | 2 GB | ext4 | DONGLE | Keys vault (optional LUKS) |
 
 **Total:** 128 GB (adjust sizes for smaller sticks)
+
+**Note:** Ventoy creates partitions 1 and 2 automatically. Partition 1 (exFAT) is the main data partition where ISOs are stored.
 
 ## Creating Partitions (GParted)
 
@@ -24,8 +26,8 @@ sudo gparted /dev/sdb &
 
 ### Steps
 
-1. **Shrink Partition 2 (exFAT)**
-   - Right-click `sdb2` → Resize
+1. **Shrink Partition 1 (exFAT - Ventoy Data)**
+   - Right-click `sdb1` → Resize
    - Set to **82 GB** (leaves ~46 GB for new partitions)
    - Apply changes
 
