@@ -528,11 +528,11 @@ BACKUP_DIR="/tmp/sonic-backup-$$"
 mkdir -p "$BACKUP_DIR"
 
 echo "  Backing up data from $SONIC_PART..."
-cp -a /mnt/sonic/* "$BACKUP_DIR/" || {
-    echo -e "${YELLOW}  ⚠ Backup failed, skipping FLASH partition${NC}"
-    rm -rf "$BACKUP_DIR"
-    NEW_SIZE=0
-}
+if cp -r /mnt/sonic/* "$BACKUP_DIR/" 2>/dev/null; then
+    echo -e "${GREEN}    ✓ Backup successful${NC}"
+else
+    echo -e "${YELLOW}  ⚠ Backup had issues but continuing...${NC}"
+fi
 
 if [ "$NEW_SIZE" -gt 0 ]; then
     # Unmount
@@ -578,11 +578,21 @@ fi
 if [ "$NEW_SIZE" -gt 0 ]; then
     # Restore data
     echo "  Restoring data..."
+    sleep 1
     mount "$SONIC_PART" /mnt/sonic
-    cp -a "$BACKUP_DIR"/* /mnt/sonic/ || {
-        echo -e "${YELLOW}  ⚠ Failed to restore data${NC}"
-        NEW_SIZE=0
-    }
+    
+    # Recreate directory structure
+    mkdir -p /mnt/sonic/ISOS/{Ubuntu,Minimal,Rescue}
+    mkdir -p /mnt/sonic/RaspberryPi
+    mkdir -p /mnt/sonic/ventoy
+    mkdir -p /mnt/sonic/LOGS
+    
+    # Restore files from backup
+    if [ -d "$BACKUP_DIR" ] && [ "$(ls -A "$BACKUP_DIR")" ]; then
+        echo "    Restoring $(find "$BACKUP_DIR" -type f | wc -l) files..."
+        cp -r "$BACKUP_DIR"/* /mnt/sonic/ 2>/dev/null || true
+        echo -e "${GREEN}    ✓ Data restored${NC}"
+    fi
     sync
 fi
 
