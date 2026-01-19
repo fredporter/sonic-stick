@@ -134,13 +134,15 @@ sleep 3
 
 # Wait for partitions to appear
 echo "Waiting for partitions to settle..."
+sync
 partprobe "$USB" 2>/dev/null || true
-sleep 3
+udevadm settle 2>/dev/null || true
+sleep 2
 
-# Ensure Ventoy partitions are present before proceeding
+# Ensure Ventoy partitions are present before proceeding (robust retry)
 PART1="${USB}1"
 PART2="${USB}2"
-for i in $(seq 1 20); do
+for i in $(seq 1 60); do
     if [ -b "$PART1" ] && [ -b "$PART2" ]; then
         break
     fi
@@ -151,6 +153,8 @@ done
 
 if [ ! -b "$PART1" ] || [ ! -b "$PART2" ]; then
     log_error "Ventoy partitions not detected after install (missing ${PART1} or ${PART2})"
+    log_info "lsblk output:" && lsblk "$USB" -o NAME,SIZE,TYPE,FSTYPE,LABEL || true
+    log_info "fdisk -l output:" && fdisk -l "$USB" 2>/dev/null || true
     exit 1
 fi
 
