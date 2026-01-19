@@ -324,3 +324,17 @@ sdb    114.6G
 [0;32mEnjoy your Sonic Stick! 🚀[0m
 
 Press Enter to continue...
+Select an action:
+  1) Download payloads (ISOs, Ventoy, Pi images)
+  2) Install/Upgrade Ventoy only
+  3) Reflash stick (install Ventoy + copy ISOs + data partition)
+  4) Rebuild from scratch (wipe and rebuild)
+  5) Create data partition only
+  6) Scan library (refresh iso-catalog)
+  7) Fix 'not a standard ventoy' error
+  8) Verify stick (check structure and configuration)
+  9) Collect support logs
+  10) Quit
+
+Choice [1-10]: [2026-01-19T15:24:30+10:00] [OK] Done
+[2026-01-19T15:24:30+10:00] [OK] Done

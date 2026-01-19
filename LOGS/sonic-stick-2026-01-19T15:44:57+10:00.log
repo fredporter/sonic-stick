@@ -1,0 +1,188 @@
+[2026-01-19T15:44:57+10:00] [INFO] Logging to /home/wizard/Code/sonic-stick/LOGS/sonic-stick-2026-01-19T15:44:57+10:00.log
+[2026-01-19T15:44:57+10:00] [INFO] ============================================
+[2026-01-19T15:44:57+10:00] [INFO] ============================================
+[2026-01-19T15:44:57+10:00] [INFO] Sonic Stick Launcher
+[2026-01-19T15:44:57+10:00] [INFO] Sonic Stick Launcher
+[2026-01-19T15:44:57+10:00] [INFO] ============================================
+[2026-01-19T15:44:57+10:00] [INFO] ============================================
+[2026-01-19T15:44:57+10:00] [INFO] Target USB device: /dev/sdb (override with USB=/dev/sdX)
+[2026-01-19T15:44:57+10:00] [INFO] Target USB device: /dev/sdb (override with USB=/dev/sdX)
+[2026-01-19T15:44:57+10:00] [INFO] Ventoy version: 1.1.10
+[2026-01-19T15:44:57+10:00] [INFO] Ventoy version: 1.1.10
+[2026-01-19T15:44:57+10:00] [INFO] Repo: /home/wizard/Code/sonic-stick
+[2026-01-19T15:44:57+10:00] [INFO] Repo: /home/wizard/Code/sonic-stick
+
+Select an action:
+  1) Download payloads (ISOs, Ventoy, Pi images)
+  2) Install/Upgrade Ventoy only
+  3) Reflash stick (install Ventoy + copy ISOs + data partition)
+  4) Rebuild from scratch (wipe and rebuild)
+  5) Create data partition only
+  6) Scan library (refresh iso-catalog)
+  7) Fix 'not a standard ventoy' error
+  8) Verify stick (check structure and configuration)
+  9) Collect support logs
+  10) Quit
+
+Choice [1-10]: [2026-01-19T15:45:09+10:00] [INFO] ============================================
+[2026-01-19T15:45:09+10:00] [INFO] ============================================
+[2026-01-19T15:45:09+10:00] [INFO] Rebuild from scratch
+[2026-01-19T15:45:09+10:00] [INFO] Rebuild from scratch
+[2026-01-19T15:45:09+10:00] [INFO] ============================================
+[2026-01-19T15:45:09+10:00] [INFO] ============================================
+[2026-01-19T15:45:09+10:00] [INFO] Logging to /home/wizard/Code/sonic-stick/LOGS/sonic-stick-2026-01-19T15:44:57+10:00.log
+[2026-01-19T15:45:09+10:00] [INFO] Logging to /home/wizard/Code/sonic-stick/LOGS/sonic-stick-2026-01-19T15:44:57+10:00.log
+[2026-01-19T15:45:09+10:00] [WARN] exfatresize (exfatprogs) is required to create FLASH partition
+[2026-01-19T15:45:09+10:00] [WARN] exfatresize (exfatprogs) is required to create FLASH partition
+[2026-01-19T15:45:09+10:00] [WARN] exfatresize (exfatprogs) is required to create FLASH partition
+Install exfatprogs now? [Y/n]: Install exfatprogs now? [Y/n]: [2026-01-19T15:45:13+10:00] [INFO] Installing exfatprogs...
+[2026-01-19T15:45:13+10:00] [INFO] Installing exfatprogs...
+[2026-01-19T15:45:13+10:00] [INFO] Installing exfatprogs...
+Hit:1 http://au.archive.ubuntu.com/ubuntu noble InRelease
+Hit:1 http://au.archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://au.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 https://packages.microsoft.com/repos/code stable InRelease
+Hit:2 http://au.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 https://packages.microsoft.com/repos/code stable InRelease
+Hit:4 http://au.archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:4 http://au.archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Reading package lists...Reading package lists...
+
+Reading package lists...Reading package lists...
+
+Building dependency tree...Building dependency tree...
+Reading state information...
+Reading state information...
+
+exfatprogs is already the newest version (1.2.2-1build1).
+0 upgraded, 0 newly installed, 0 to remove and 1229 not upgraded.
+exfatprogs is already the newest version (1.2.2-1build1).
+0 upgraded, 0 newly installed, 0 to remove and 1229 not upgraded.
+[2026-01-19T15:45:17+10:00] [INFO] Starting complete rebuild on /dev/sdb
+[2026-01-19T15:45:17+10:00] [INFO] Starting complete rebuild on /dev/sdb
+[2026-01-19T15:45:17+10:00] [INFO] Starting complete rebuild on /dev/sdb
+[2026-01-19T15:45:17+10:00] [INFO] Environment snapshot:
+[2026-01-19T15:45:17+10:00] [INFO] Environment snapshot:
+[2026-01-19T15:45:17+10:00] [INFO] Environment snapshot:
+[2026-01-19T15:45:17+10:00] [INFO] uname: Linux wizard-dell-server 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-01-19T15:45:17+10:00] [INFO] uname: Linux wizard-dell-server 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-01-19T15:45:17+10:00] [INFO] uname: Linux wizard-dell-server 6.8.0-90-generic #91~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 15:20:45 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+[2026-01-19T15:45:17+10:00] [INFO] lsblk: NAME     SIZE FSTYPE   LABEL;loop0      4K squashfs ;loop1   74.3M squashfs ;loop2   73.9M squashfs ;loop3  271.2M squashfs ;loop4  251.6M squashfs ;loop5  505.1M squashfs ;loop6  531.4M squashfs ;loop7   91.7M squashfs ;loop8   12.9M squashfs ;loop9   12.2M squashfs ;loop10  38.8M squashfs ;loop11  48.1M squashfs ;loop12   500K squashfs ;loop13   576K squashfs ;sda    238.5G          ;├─sda1   512M vfat     ;└─sda2   238G ext4     ;sdb    114.6G          ;sr0     1024M          ;
+[2026-01-19T15:45:17+10:00] [INFO] lsblk: NAME     SIZE FSTYPE   LABEL;loop0      4K squashfs ;loop1   74.3M squashfs ;loop2   73.9M squashfs ;loop3  271.2M squashfs ;loop4  251.6M squashfs ;loop5  505.1M squashfs ;loop6  531.4M squashfs ;loop7   91.7M squashfs ;loop8   12.9M squashfs ;loop9   12.2M squashfs ;loop10  38.8M squashfs ;loop11  48.1M squashfs ;loop12   500K squashfs ;loop13   576K squashfs ;sda    238.5G          ;├─sda1   512M vfat     ;└─sda2   238G ext4     ;sdb    114.6G          ;sr0     1024M          ;
+[2026-01-19T15:45:17+10:00] [INFO] lsblk: NAME     SIZE FSTYPE   LABEL;loop0      4K squashfs ;loop1   74.3M squashfs ;loop2   73.9M squashfs ;loop3  271.2M squashfs ;loop4  251.6M squashfs ;loop5  505.1M squashfs ;loop6  531.4M squashfs ;loop7   91.7M squashfs ;loop8   12.9M squashfs ;loop9   12.2M squashfs ;loop10  38.8M squashfs ;loop11  48.1M squashfs ;loop12   500K squashfs ;loop13   576K squashfs ;sda    238.5G          ;├─sda1   512M vfat     ;└─sda2   238G ext4     ;sdb    114.6G          ;sr0     1024M          ;
+[2026-01-19T15:45:17+10:00] [INFO] df: Filesystem      Size  Used Avail Mounted on;tmpfs           764M  2.1M  762M /run;/dev/sda2       234G   33G  189G /;tmpfs           3.8G   13M  3.8G /dev/shm;tmpfs           5.0M  4.0K  5.0M /run/lock;efivarfs        256K  205K   47K /sys/firmware/efi/efivars;/dev/sda1       511M  6.1M  505M /boot/efi;tmpfs           764M  116K  764M /run/user/1000;
+[2026-01-19T15:45:17+10:00] [INFO] df: Filesystem      Size  Used Avail Mounted on;tmpfs           764M  2.1M  762M /run;/dev/sda2       234G   33G  189G /;tmpfs           3.8G   13M  3.8G /dev/shm;tmpfs           5.0M  4.0K  5.0M /run/lock;efivarfs        256K  205K   47K /sys/firmware/efi/efivars;/dev/sda1       511M  6.1M  505M /boot/efi;tmpfs           764M  116K  764M /run/user/1000;
+[2026-01-19T15:45:17+10:00] [INFO] df: Filesystem      Size  Used Avail Mounted on;tmpfs           764M  2.1M  762M /run;/dev/sda2       234G   33G  189G /;tmpfs           3.8G   13M  3.8G /dev/shm;tmpfs           5.0M  4.0K  5.0M /run/lock;efivarfs        256K  205K   47K /sys/firmware/efi/efivars;/dev/sda1       511M  6.1M  505M /boot/efi;tmpfs           764M  116K  764M /run/user/1000;
+[H[2J[3J[H[2J[3J[0;35m╔════════════════════════════════════════════════════════════╗[0m
+[0;35m╔════════════════════════════════════════════════════════════╗[0m
+[0;35m║         SONIC STICK - COMPLETE REBUILD FROM SCRATCH       ║[0m
+[0;35m║         SONIC STICK - COMPLETE REBUILD FROM SCRATCH       ║[0m
+[0;35m╚════════════════════════════════════════════════════════════╝[0m
+
+[0;35mThis will:[0m
+  1. WIPE all data on /dev/sdb
+  2. Install fresh Ventoy bootloader
+  3. Copy all ISOs with organized structure
+  4. Install custom Ventoy menu with organized categories
+  5. Relabel main partition to SONIC
+  6. Create FLASH partition for logs/tracking (4GB ext4)
+  7. Initialize library catalog system
+
+[0;35m╚════════════════════════════════════════════════════════════╝[0m
+
+[0;35mThis will:[0m
+  1. WIPE all data on /dev/sdb
+  2. Install fresh Ventoy bootloader
+  3. Copy all ISOs with organized structure
+  4. Install custom Ventoy menu with organized categories
+  5. Relabel main partition to SONIC
+  6. Create FLASH partition for logs/tracking (4GB ext4)
+  7. Initialize library catalog system
+
+[0;31m═══════════════════════════════════════════════════════════[0m
+[0;31m═══════════════════════════════════════════════════════════[0m
+[0;31mWARNING: ALL DATA ON /dev/sdb WILL BE PERMANENTLY ERASED![0m
+[0;31mWARNING: ALL DATA ON /dev/sdb WILL BE PERMANENTLY ERASED![0m
+[0;31m═══════════════════════════════════════════════════════════[0m
+[0;31m═══════════════════════════════════════════════════════════[0m
+
+
+NAME   SIZE TYPE FSTYPE LABEL MOUNTPOINT
+sdb  114.6G disk              
+NAME   SIZE TYPE FSTYPE LABEL MOUNTPOINT
+sdb  114.6G disk              
+
+
+Type 'REBUILD' in capitals to continue: Type 'REBUILD' in capitals to continue: 
+
+[0;34m[1/7] Unmounting all partitions on /dev/sdb...[0m
+[0;34m[1/7] Unmounting all partitions on /dev/sdb...[0m
+
+[0;34m[2/7] Wiping disk and installing fresh Ventoy...[0m
+[1;33mThis will take 30-60 seconds...[0m
+
+[0;34m[2/7] Wiping disk and installing fresh Ventoy...[0m
+[1;33mThis will take 30-60 seconds...[0m
+
+**********************************************
+      Ventoy: 1.1.10  x86_64
+      longpanda admin@ventoy.net
+      https://www.ventoy.net
+
+**********************************************
+      Ventoy: 1.1.10  x86_64
+      longpanda admin@ventoy.net
+      https://www.ventoy.net
+**********************************************
+
+**********************************************
+
+Disk : /dev/sdb
+Disk : /dev/sdb
+Model:  USB  SanDisk 3.2Gen1 (scsi)
+Model:  USB  SanDisk 3.2Gen1 (scsi)
+Size : 114 GiB
+Style: GPT
+
+
+[33mAttention:[0m
+[33mYou will install Ventoy to /dev/sdb.[0m
+Size : 114 GiB
+Style: GPT
+
+
+[33mAttention:[0m
+[33mYou will install Ventoy to /dev/sdb.[0m
+[33mAll the data on the disk /dev/sdb will be lost!!![0m
+
+[33mAll the data on the disk /dev/sdb will be lost!!![0m
+
+Waiting for partitions to settle...
+Waiting for partitions to settle...
+
+[0;34m[3/7] Mounting Ventoy partition and copying ISOs...[0m
+
+[0;34m[3/7] Mounting Ventoy partition and copying ISOs...[0m
+mount: /mnt/sonic: special device /dev/sdb1 does not exist.
+mount: /mnt/sonic: special device /dev/sdb1 does not exist.
+[0;31mFailed to mount /dev/sdb1[0m
+[0;31mFailed to mount /dev/sdb1[0m
+[2026-01-19T15:45:31+10:00] [WARN] Rebuild failed or cancelled
+[2026-01-19T15:45:31+10:00] [WARN] Rebuild failed or cancelled
+Press Enter to continue...
+Select an action:
+  1) Download payloads (ISOs, Ventoy, Pi images)
+  2) Install/Upgrade Ventoy only
+  3) Reflash stick (install Ventoy + copy ISOs + data partition)
+  4) Rebuild from scratch (wipe and rebuild)
+  5) Create data partition only
+  6) Scan library (refresh iso-catalog)
+  7) Fix 'not a standard ventoy' error
+  8) Verify stick (check structure and configuration)
+  9) Collect support logs
+  10) Quit
+
+Choice [1-10]: [2026-01-19T15:46:54+10:00] [OK] Done
+[2026-01-19T15:46:54+10:00] [OK] Done

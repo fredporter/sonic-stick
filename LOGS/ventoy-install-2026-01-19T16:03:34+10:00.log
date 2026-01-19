@@ -1,0 +1,22 @@
+
+**********************************************
+      Ventoy: 1.1.10  x86_64
+      longpanda admin@ventoy.net
+      https://www.ventoy.net
+**********************************************
+
+Disk : /dev/sdb
+Model:  USB  SanDisk 3.2Gen1 (scsi)
+Size : 114 GiB
+Style: GPT
+
+
+[33mAttention:[0m
+[33mYou will install Ventoy to /dev/sdb.[0m
+[33mAll the data on the disk /dev/sdb will be lost!!![0m
+
+Disk /dev/sdb: 114.6 GiB, 123048296448 bytes, 240328704 sectors
+Disk model:  SanDisk 3.2Gen1
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes

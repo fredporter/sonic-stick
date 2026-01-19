@@ -1,4 +1,4 @@
-# Sonic Stick Pack v1.0.0.1
+# Sonic Stick Pack v1.0.0.2
 
 **The ultimate multiboot rescue + install USB for Linux sysadmins, makers, and tinkerers.**
 
@@ -35,14 +35,9 @@ Sonic Stick (SONIC label)
 - Click-to-run: `gnome-terminal -- bash -lc "cd ~/Code/sonic-stick && ./scripts/sonic-stick.sh"`
 - CLI: `sudo ./scripts/sonic-stick.sh` (menu to download payloads, install/upgrade Ventoy, reflash, rebuild, scan, collect logs)
 
-### Troubleshooting: "Not a Standard Ventoy" Error?
+### Troubleshooting
 
-If you see this error when booting, run the fix script:
-```bash
-sudo bash scripts/fix-ventoy-stick.sh
-```
-
-Or select **option 7** from the main menu. See [docs/fix-ventoy-error.md](docs/fix-ventoy-error.md) for detailed troubleshooting.
+For detailed troubleshooting and boot error fixes, see archived documentation in [docs/.archive/](docs/.archive/).
 
 ### 1. Download payloads (30–60 min)
 ```bash

@@ -29,14 +29,23 @@ NC='\033[0m'
 wait_for_ventoy_parts() {
     local dev="$1" retries="${2:-60}"
     local p1="${dev}1" p2="${dev}2"
+    echo "Waiting for $p1 and $p2 (max ${retries}s)..."
     for i in $(seq 1 "$retries"); do
         if [ -b "$p1" ] && [ -b "$p2" ]; then
+            echo "✓ Partitions detected: $p1 and $p2"
             return 0
         fi
+        # Aggressive reread every iteration
         blockdev --rereadpt "$dev" 2>/dev/null || true
         partprobe "$dev" 2>/dev/null || true
-        udevadm settle 2>/dev/null || true
-        lsblk "$dev" -o NAME,SIZE,TYPE,FSTYPE,LABEL 2>/dev/null | head -5 >> "$VENTOY_INSTALL_LOG" || true
+        partx -u "$dev" 2>/dev/null || true
+        udevadm settle --timeout=2 2>/dev/null || true
+        
+        # Log state every 5 seconds
+        if [ $((i % 5)) -eq 0 ]; then
+            echo "  [$i/${retries}s] Still waiting..."
+            lsblk "$dev" -o NAME,SIZE,TYPE,FSTYPE,LABEL 2>/dev/null | tee -a "$VENTOY_INSTALL_LOG" || true
+        fi
         sleep 1
     done
     return 1
@@ -103,16 +112,42 @@ if [[ "$confirm" != "REBUILD" ]]; then
     exit 0
 fi
 
-# Step 1: Unmount everything
+# Step 1: Unmount everything and ensure disk is fully released
 echo ""
 echo -e "${BLUE}[1/7] Unmounting all partitions on $USB...${NC}"
+
+# Check for swap
+if swapon --show | grep -q "$USB"; then
+    echo "  Disabling swap on $USB"
+    swapoff "${USB}"* 2>/dev/null || true
+fi
+
+# Unmount all partitions
 for part in ${USB}*[0-9]; do
     if mount | grep -q "$part"; then
         echo "  Unmounting $part"
         umount "$part" 2>/dev/null || true
     fi
 done
-sleep 1
+
+# Remove device-mapper mappings if any
+if command -v dmsetup &>/dev/null; then
+    dmsetup remove_all 2>/dev/null || true
+fi
+
+# Check for holders (LVM, dm, md)
+if [ -d "/sys/block/${USB#/dev/}/holders" ]; then
+    HOLDERS=$(ls -1 "/sys/block/${USB#/dev/}/holders" 2>/dev/null || true)
+    if [ -n "$HOLDERS" ]; then
+        echo -e "${RED}WARNING: Device has holders: $HOLDERS${NC}"
+        echo "  Attempting to release..."
+        for holder in $HOLDERS; do
+            dmsetup remove "$holder" 2>/dev/null || true
+        done
+    fi
+fi
+
+sleep 2
 
 # Step 2: Complete wipe and install Ventoy
 echo ""
@@ -155,7 +190,8 @@ fi
 
 # Run Ventoy installer with -I flag (force install, wipe disk)
 cd "$VENTOY_DIR"
-echo "yes" | ./Ventoy2Disk.sh -I -g "$USB" 2>&1 | tee "$VENTOY_INSTALL_LOG" || {
+# Ventoy requires TWO confirmations: first "y", then "y" again for double-check
+printf "y\ny\n" | ./Ventoy2Disk.sh -I -g "$USB" 2>&1 | tee "$VENTOY_INSTALL_LOG" || {
     echo -e "${RED}Ventoy installation failed${NC}"
     echo "Ventoy install log: $VENTOY_INSTALL_LOG"
     exit 1
@@ -163,25 +199,68 @@ echo "yes" | ./Ventoy2Disk.sh -I -g "$USB" 2>&1 | tee "$VENTOY_INSTALL_LOG" || {
 log_info "Ventoy install log: $VENTOY_INSTALL_LOG"
 
 cd "$BASE_DIR"
-sleep 3
 
-# Wait for partitions to appear
-echo "Waiting for partitions to settle..."
-sync
+# Aggressive partition table reread
+echo "Forcing kernel partition table reread..."
+sync; sleep 2
+blockdev --rereadpt "$USB" 2>/dev/null || true
+partprobe "$USB" 2>/dev/null || true
+partx -u "$USB" 2>/dev/null || true
+udevadm settle --timeout=10 2>/dev/null || true
+sleep 2
+udevadm trigger --name-match="${USB##*/}" 2>/dev/null || true
+udevadm settle --timeout=10 2>/dev/null || true
+sleep 2
+
+# Verify GPT was written
+echo "Verifying partition table..."
+if ! fdisk -l "$USB" 2>/dev/null | grep -q "${USB}1"; then
+    echo -e "${RED}ERROR: fdisk shows no partitions after Ventoy install!${NC}"
+    fdisk -l "$USB" 2>&1 | tee -a "$VENTOY_INSTALL_LOG"
+    echo "Ventoy install log: $VENTOY_INSTALL_LOG"
+    exit 1
+fi
+
+# Wait for partition nodes to appear
+echo "Waiting for partition device nodes to appear..."
 wait_for_ventoy_parts "$USB" 60 || {
     log_warn "Partitions missing after first Ventoy run; retrying install..."
     cd "$VENTOY_DIR"
-    echo "yes" | ./Ventoy2Disk.sh -I -g "$USB" 2>&1 | tee -a "$VENTOY_INSTALL_LOG" || {
+    # Two confirmations needed
+    printf "y\ny\n" | ./Ventoy2Disk.sh -I -g "$USB" 2>&1 | tee -a "$VENTOY_INSTALL_LOG" || {
         log_error "Ventoy installation failed on retry"
         echo "Ventoy install log: $VENTOY_INSTALL_LOG"
         exit 1
     }
     cd "$BASE_DIR"
-    sync
+    
+    # Same aggressive reread after retry
+    echo "Forcing kernel partition table reread after retry..."
+    sync; sleep 2
+    blockdev --rereadpt "$USB" 2>/dev/null || true
+    partprobe "$USB" 2>/dev/null || true
+    partx -u "$USB" 2>/dev/null || true
+    udevadm settle --timeout=10 2>/dev/null || true
+    sleep 2
+    udevadm trigger --name-match="${USB##*/}" 2>/dev/null || true
+    udevadm settle --timeout=10 2>/dev/null || true
+    sleep 2
+    
     wait_for_ventoy_parts "$USB" 30 || {
-        log_error "Ventoy partitions not detected after install (missing ${USB}1 or ${USB}2)"
-        log_info "lsblk output:" && lsblk "$USB" -o NAME,SIZE,TYPE,FSTYPE,LABEL || true
-        log_info "fdisk -l output:" && fdisk -l "$USB" 2>/dev/null || true
+        log_error "Ventoy partitions not detected after retry (missing ${USB}1 or ${USB}2)"
+        echo ""
+        echo "=== DIAGNOSTIC OUTPUT ==="
+        echo "--- lsblk ---"
+        lsblk "$USB" -o NAME,SIZE,TYPE,FSTYPE,LABEL,PARTLABEL 2>&1 | tee -a "$VENTOY_INSTALL_LOG"
+        echo "--- fdisk -l ---"
+        fdisk -l "$USB" 2>&1 | tee -a "$VENTOY_INSTALL_LOG"
+        echo "--- blkid ---"
+        blkid | grep "$USB" 2>&1 | tee -a "$VENTOY_INSTALL_LOG" || echo "No blkid entries for $USB"
+        echo "--- /sys/block entries ---"
+        ls -la /sys/block/"${USB##*/}"/ 2>&1 | tee -a "$VENTOY_INSTALL_LOG"
+        echo "--- dmesg tail (last 30 lines) ---"
+        dmesg | tail -n 30 | tee -a "$VENTOY_INSTALL_LOG"
+        echo ""
         echo "Ventoy install log: $VENTOY_INSTALL_LOG"
         exit 1
     }
