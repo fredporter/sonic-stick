@@ -7,3 +7,5 @@ TOOLS/
 *.DS_Store
 **/.archive/
 ISOS/.archive/
+LOGS/
+config/sonic-manifest.json

@@ -3,11 +3,40 @@
 
 set -euo pipefail
 
-VERSION="1.0.0.6"
+VERSION="1.0.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 USB="${USB:-/dev/sdb}"
 VENTOY_VERSION_DEFAULT="${VENTOY_VERSION:-1.1.10}"
+MANIFEST=""
+DRY_RUN=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --manifest)
+      MANIFEST="$2"
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      shift 1
+      ;;
+    *)
+      shift 1
+      ;;
+  esac
+done
+
+OS_NAME="$(uname -s | tr '[:upper:]' '[:lower:]')"
+if [[ "$OS_NAME" != "linux" ]]; then
+  echo "ERROR Sonic Screwdriver requires Linux for build operations."
+  exit 1
+fi
+
+if [[ -n "$MANIFEST" && -f "$MANIFEST" ]]; then
+  USB="$(python3 - "$MANIFEST" <<'PY'\nimport json,sys\np=sys.argv[1]\nwith open(p,'r') as f:\n    data=json.load(f)\nprint(data.get('usb_device','/dev/sdb'))\nPY\n)"
+  VENTOY_VERSION_DEFAULT="$(python3 - "$MANIFEST" <<'PY'\nimport json,sys\np=sys.argv[1]\nwith open(p,'r') as f:\n    data=json.load(f)\nprint(data.get('ventoy_version','1.1.10'))\nPY\n)"
+fi
 
 # Re-exec with sudo for device access while preserving USB/VENTOY_VERSION
 if [[ $EUID -ne 0 && -z "${SONIC_SUDO_REEXEC:-}" ]]; then
@@ -22,6 +51,14 @@ log_section "Sonic Stick Launcher v${VERSION}"
 log_info "Target USB device: $USB (override with USB=/dev/sdX)"
 log_info "Ventoy version: $VENTOY_VERSION_DEFAULT"
 log_info "Repo: $BASE_DIR"
+if [[ -n "$MANIFEST" ]]; then
+  log_info "Manifest: $MANIFEST"
+fi
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  log_warn "Dry run enabled. No destructive actions should be executed."
+  verify_stick || true
+  exit 0
+fi
 
 pause() { read -rp "Press Enter to continue..."; }
 

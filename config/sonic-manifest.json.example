@@ -1,0 +1,11 @@
+{
+  "usb_device": "/dev/sdb",
+  "ventoy_version": "1.1.10",
+  "repo_root": "/path/to/sonic",
+  "payload_dir": "/path/to/sonic/payloads",
+  "iso_dir": "/path/to/sonic/ISOS",
+  "flash_label": "FLASH",
+  "sonic_label": "SONIC",
+  "vtoyefi_label": "VTOYEFI",
+  "dry_run": false
+}
