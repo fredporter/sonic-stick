@@ -15,6 +15,8 @@ def build_plan(args: argparse.Namespace) -> Dict:
         usb_device=args.usb_device,
         ventoy_version=args.ventoy_version,
         dry_run=args.dry_run,
+        layout_path=Path(args.layout_file) if args.layout_file else None,
+        format_mode=args.format_mode,
     )
     return manifest.to_dict()
 
@@ -23,9 +25,18 @@ def write_plan(
     usb_device: str,
     ventoy_version: str,
     dry_run: bool,
+    layout_path: Optional[Path],
+    format_mode: Optional[str],
     out_path: Path,
 ) -> Dict:
-    manifest = default_manifest(repo_root, usb_device, ventoy_version, dry_run)
+    manifest = default_manifest(
+        repo_root,
+        usb_device,
+        ventoy_version,
+        dry_run,
+        layout_path=layout_path,
+        format_mode=format_mode,
+    )
     write_manifest(out_path, manifest)
     return manifest.to_dict()
 
@@ -37,6 +48,13 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
     parser.add_argument("--ventoy-version", default="1.1.10")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out", default="config/sonic-manifest.json")
+    parser.add_argument("--layout-file", default="config/sonic-layout.json")
+    parser.add_argument(
+        "--format-mode",
+        default=None,
+        choices=["full", "skip"],
+        help="Formatting mode for partitions (full|skip). Defaults to layout file or full.",
+    )
 
     return parser.parse_args(argv)
 
@@ -49,13 +67,19 @@ def main() -> int:
         return 1
 
     out_path = Path(args.out)
-    plan = write_plan(
-        repo_root=Path(args.repo_root),
-        usb_device=args.usb_device,
-        ventoy_version=args.ventoy_version,
-        dry_run=args.dry_run,
-        out_path=out_path,
-    )
+    try:
+        plan = write_plan(
+            repo_root=Path(args.repo_root),
+            usb_device=args.usb_device,
+            ventoy_version=args.ventoy_version,
+            dry_run=args.dry_run,
+            layout_path=Path(args.layout_file) if args.layout_file else None,
+            format_mode=args.format_mode,
+            out_path=out_path,
+        )
+    except ValueError as exc:
+        print(f"ERROR {exc}")
+        return 1
     print(f"Plan written: {out_path}")
     if args.dry_run:
         print("Dry run enabled. No destructive operations should be executed.")

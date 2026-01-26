@@ -203,6 +203,20 @@ detect_flash_partition() {
   return 0  # Not an error, just not found
 }
 
+detect_partition_by_label() {
+  local label="$1"
+  if [[ -z "$label" ]]; then
+    return 1
+  fi
+  local part
+  part=$(lsblk -rpo NAME,LABEL 2>/dev/null | awk -v target="$label" '$2==target {print $1; exit}')
+  if [[ -n "$part" ]]; then
+    echo "$part"
+    return 0
+  fi
+  return 1
+}
+
 get_partition_number() {
   # Extract partition number from a partition path
   # Works with both /dev/sdb1 and /dev/nvme0n1p1 formats
@@ -216,4 +230,48 @@ get_partition_number() {
   else
     return 1
   fi
+}
+
+sonic_detect_os() {
+  # Align with Wizard OS detection semantics.
+  if [[ -f /etc/alpine-release ]]; then
+    echo "alpine"
+    return 0
+  fi
+  if command -v apk >/dev/null 2>&1; then
+    echo "alpine"
+    return 0
+  fi
+  if [[ -f /etc/os-release ]]; then
+    if grep -q "ID=alpine" /etc/os-release || grep -q "ID='alpine'" /etc/os-release; then
+      echo "alpine"
+      return 0
+    fi
+    if grep -q "ID=ubuntu" /etc/os-release || grep -q "ID='ubuntu'" /etc/os-release; then
+      echo "ubuntu"
+      return 0
+    fi
+  fi
+  local uname_out
+  uname_out="$(uname -s 2>/dev/null || echo "unknown")"
+  case "$uname_out" in
+    Darwin) echo "macos" ;;
+    Linux) echo "ubuntu" ;;
+    MINGW*|MSYS*|CYGWIN*) echo "windows" ;;
+    *) echo "unknown" ;;
+  esac
+}
+
+sonic_copy() {
+  # OS-aware copy helper: prefers rsync when available.
+  local src="$1"
+  local dest="$2"
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --no-perms --no-owner --no-group "$src" "$dest"
+    return $?
+  fi
+  if cp -a "$src" "$dest" 2>/dev/null; then
+    return 0
+  fi
+  cp -R "$src" "$dest"
 }

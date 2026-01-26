@@ -1,6 +1,6 @@
 # uDOS Sonic Screwdriver v1.0.1.0
 
-Sonic Screwdriver is a Linux-only USB build system for Ventoy-based multi-boot sticks.
+Sonic Screwdriver is a Linux-only USB build system for multi-boot sticks.
 It separates planning (Core) from execution (Bash) so destructive operations are explicit,
 reviewable, and OS-aware.
 
@@ -9,6 +9,7 @@ reviewable, and OS-aware.
 - Core plans, validates, and writes a manifest.
 - Bash executes disk operations only on Linux.
 - Dry-run is supported for inspection before changes.
+- v1.1.0+ targets a custom multi-partition layout (Ventoy-free).
 
 ## Quick Start (Linux)
 
@@ -48,6 +49,8 @@ sonic/
 ## Docs
 
 - docs/specs/sonic-screwdriver-v1.0.1.md
+- docs/specs/sonic-screwdriver-v1.1.0.md
+- docs/roadmap.md
 - docs/howto/build-usb.md
 - docs/howto/dry-run.md
 - docs/devlog/2026-01-24-sonic-v1.0.1.md
@@ -57,4 +60,3 @@ sonic/
 
 - All destructive operations require sudo and explicit confirmation.
 - Always verify target device before running rebuild scripts.
-

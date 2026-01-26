@@ -10,6 +10,11 @@ USB="${USB:-/dev/sdb}"
 VENTOY_VERSION_DEFAULT="${VENTOY_VERSION:-1.1.10}"
 MANIFEST=""
 DRY_RUN=0
+USE_V2=0
+SKIP_PAYLOADS=0
+PAYLOADS_ONLY=0
+PAYLOADS_DIR=""
+NO_VALIDATE_PAYLOADS=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -21,21 +26,44 @@ while [[ $# -gt 0 ]]; do
       DRY_RUN=1
       shift 1
       ;;
+    --v2)
+      USE_V2=1
+      shift 1
+      ;;
+    --skip-payloads)
+      SKIP_PAYLOADS=1
+      shift 1
+      ;;
+    --payloads-only)
+      PAYLOADS_ONLY=1
+      shift 1
+      ;;
+    --payloads-dir)
+      PAYLOADS_DIR="$2"
+      shift 2
+      ;;
+    --no-validate-payloads)
+      NO_VALIDATE_PAYLOADS=1
+      shift 1
+      ;;
     *)
       shift 1
       ;;
   esac
 done
 
-OS_NAME="$(uname -s | tr '[:upper:]' '[:lower:]')"
-if [[ "$OS_NAME" != "linux" ]]; then
-  echo "ERROR Sonic Screwdriver requires Linux for build operations."
+source "${SCRIPT_DIR}/lib/logging.sh"
+OS_NAME="$(sonic_detect_os)"
+if [[ "$OS_NAME" != "alpine" && "$OS_NAME" != "ubuntu" ]]; then
+  echo "ERROR Sonic Screwdriver requires Linux (Ubuntu/Alpine) for build operations."
   exit 1
 fi
 
 if [[ -n "$MANIFEST" && -f "$MANIFEST" ]]; then
   USB="$(python3 - "$MANIFEST" <<'PY'\nimport json,sys\np=sys.argv[1]\nwith open(p,'r') as f:\n    data=json.load(f)\nprint(data.get('usb_device','/dev/sdb'))\nPY\n)"
   VENTOY_VERSION_DEFAULT="$(python3 - "$MANIFEST" <<'PY'\nimport json,sys\np=sys.argv[1]\nwith open(p,'r') as f:\n    data=json.load(f)\nprint(data.get('ventoy_version','1.1.10'))\nPY\n)"
+  FORMAT_MODE="$(python3 - "$MANIFEST" <<'PY'\nimport json,sys\np=sys.argv[1]\nwith open(p,'r') as f:\n    data=json.load(f)\nprint(data.get('format_mode','full'))\nPY\n)"
+  PARTITION_COUNT="$(python3 - "$MANIFEST" <<'PY'\nimport json,sys\np=sys.argv[1]\nwith open(p,'r') as f:\n    data=json.load(f)\nparts=data.get('partitions') or []\nprint(len(parts))\nPY\n)"
 fi
 
 # Re-exec with sudo for device access while preserving USB/VENTOY_VERSION
@@ -43,7 +71,6 @@ if [[ $EUID -ne 0 && -z "${SONIC_SUDO_REEXEC:-}" ]]; then
   exec sudo -E SONIC_SUDO_REEXEC=1 USB="$USB" VENTOY_VERSION="$VENTOY_VERSION_DEFAULT" bash "$0" "$@"
 fi
 
-source "${SCRIPT_DIR}/lib/logging.sh"
 init_logging "sonic-stick"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
@@ -51,8 +78,32 @@ log_section "Sonic Stick Launcher v${VERSION}"
 log_info "Target USB device: $USB (override with USB=/dev/sdX)"
 log_info "Ventoy version: $VENTOY_VERSION_DEFAULT"
 log_info "Repo: $BASE_DIR"
+log_info "Detected OS: $OS_NAME"
 if [[ -n "$MANIFEST" ]]; then
   log_info "Manifest: $MANIFEST"
+  log_info "Format mode: ${FORMAT_MODE:-full}"
+  log_info "Partition layout entries: ${PARTITION_COUNT:-0}"
+fi
+
+if [[ "$USE_V2" -eq 1 ]]; then
+  if [[ "$PAYLOADS_ONLY" -eq 1 ]]; then
+    log_section "Sonic v2 payloads (only)"
+    bash "${SCRIPT_DIR}/apply-payloads-v2.sh" --manifest "${MANIFEST}" ${PAYLOADS_DIR:+--payloads-dir "$PAYLOADS_DIR"} ${NO_VALIDATE_PAYLOADS:+--no-validate} ${DRY_RUN:+--dry-run}
+    exit $?
+  fi
+  log_section "Sonic v2 partition layout"
+  bash "${SCRIPT_DIR}/partition-layout.sh" --manifest "${MANIFEST}" ${DRY_RUN:+--dry-run}
+  rc=$?
+  if [[ $rc -ne 0 ]]; then
+    exit $rc
+  fi
+  if [[ "$SKIP_PAYLOADS" -eq 1 ]]; then
+    log_warn "Skipping payload application (--skip-payloads)"
+    exit 0
+  fi
+  log_section "Sonic v2 payloads"
+  bash "${SCRIPT_DIR}/apply-payloads-v2.sh" --manifest "${MANIFEST}" ${PAYLOADS_DIR:+--payloads-dir "$PAYLOADS_DIR"} ${NO_VALIDATE_PAYLOADS:+--no-validate} ${DRY_RUN:+--dry-run}
+  exit $?
 fi
 if [[ "$DRY_RUN" -eq 1 ]]; then
   log_warn "Dry run enabled. No destructive actions should be executed."

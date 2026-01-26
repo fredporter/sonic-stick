@@ -22,6 +22,13 @@ def main() -> int:
     plan_cmd.add_argument("--ventoy-version", default="1.1.10")
     plan_cmd.add_argument("--dry-run", action="store_true")
     plan_cmd.add_argument("--out", default="config/sonic-manifest.json")
+    plan_cmd.add_argument("--layout-file", default="config/sonic-layout.json")
+    plan_cmd.add_argument(
+        "--format-mode",
+        default=None,
+        choices=["full", "skip"],
+        help="Formatting mode for partitions (full|skip). Defaults to layout file or full.",
+    )
 
     run_cmd = sub.add_parser("run", help="Execute bash entrypoint")
     run_cmd.add_argument("--manifest", default="config/sonic-manifest.json")
@@ -34,13 +41,19 @@ def main() -> int:
         if not is_supported():
             print("ERROR Unsupported OS for build operations. Use Linux.")
             return 1
-        write_plan(
-            repo_root=Path(args.repo_root),
-            usb_device=args.usb_device,
-            ventoy_version=args.ventoy_version,
-            dry_run=args.dry_run,
-            out_path=Path(args.out),
-        )
+        try:
+            write_plan(
+                repo_root=Path(args.repo_root),
+                usb_device=args.usb_device,
+                ventoy_version=args.ventoy_version,
+                dry_run=args.dry_run,
+                layout_path=Path(args.layout_file) if args.layout_file else None,
+                format_mode=args.format_mode,
+                out_path=Path(args.out),
+            )
+        except ValueError as exc:
+            print(f"ERROR {exc}")
+            return 1
         print(f"Plan written: {args.out}")
         if args.dry_run:
             print("Dry run enabled. No destructive operations should be executed.")
