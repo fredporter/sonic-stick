@@ -5,10 +5,9 @@
   "version": {
     "major": 1,
     "minor": 0,
-    "patch": 1,
-    "build": 0
+    "patch": 1
   },
-  "display": "v1.0.1.0",
+  "display": "v1.0.1",
   "channel": "alpha",
   "released": "2026-01-24",
   "description": "Sonic Screwdriver USB builder with core planning and OS-aware bash execution",
