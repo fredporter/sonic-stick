@@ -4,8 +4,12 @@ import argparse
 from pathlib import Path
 from typing import Dict, Optional
 
-from manifest import default_manifest, write_manifest
-from os_limits import support_message, is_supported
+try:
+    from .manifest import default_manifest, write_manifest
+    from .os_limits import support_message, is_supported
+except ImportError:  # pragma: no cover - fallback for direct execution
+    from manifest import default_manifest, write_manifest
+    from os_limits import support_message, is_supported
 
 
 def build_plan(args: argparse.Namespace) -> Dict:
@@ -17,6 +21,7 @@ def build_plan(args: argparse.Namespace) -> Dict:
         dry_run=args.dry_run,
         layout_path=Path(args.layout_file) if args.layout_file else None,
         format_mode=args.format_mode,
+        payload_dir=Path(args.payloads_dir) if args.payloads_dir else None,
     )
     return manifest.to_dict()
 
@@ -27,6 +32,7 @@ def write_plan(
     dry_run: bool,
     layout_path: Optional[Path],
     format_mode: Optional[str],
+    payload_dir: Optional[Path],
     out_path: Path,
 ) -> Dict:
     manifest = default_manifest(
@@ -36,6 +42,7 @@ def write_plan(
         dry_run,
         layout_path=layout_path,
         format_mode=format_mode,
+        payload_dir=payload_dir,
     )
     write_manifest(out_path, manifest)
     return manifest.to_dict()
@@ -49,6 +56,11 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out", default="config/sonic-manifest.json")
     parser.add_argument("--layout-file", default="config/sonic-layout.json")
+    parser.add_argument(
+        "--payloads-dir",
+        default=None,
+        help="Override payloads root directory (defaults to repo_root/payloads)",
+    )
     parser.add_argument(
         "--format-mode",
         default=None,
@@ -75,6 +87,7 @@ def main() -> int:
             dry_run=args.dry_run,
             layout_path=Path(args.layout_file) if args.layout_file else None,
             format_mode=args.format_mode,
+            payload_dir=Path(args.payloads_dir) if args.payloads_dir else None,
             out_path=out_path,
         )
     except ValueError as exc:

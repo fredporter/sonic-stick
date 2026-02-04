@@ -144,8 +144,9 @@ def default_manifest(
     dry_run: bool,
     layout_path: Optional[Path] = None,
     format_mode: Optional[str] = None,
+    payload_dir: Optional[Path] = None,
 ) -> SonicManifest:
-    payload_dir = repo_root / "payloads"
+    resolved_payload_dir = payload_dir or (repo_root / "payloads")
     iso_dir = repo_root / "ISOS"
     resolved_format = format_mode or _load_format_mode(layout_path) or "full"
     resolved_auto_scale = _load_auto_scale(layout_path) or False
@@ -155,7 +156,7 @@ def default_manifest(
         usb_device=usb_device,
         ventoy_version=ventoy_version,
         repo_root=str(repo_root),
-        payload_dir=str(payload_dir),
+        payload_dir=str(resolved_payload_dir),
         iso_dir=str(iso_dir),
         dry_run=dry_run,
         format_mode=resolved_format,

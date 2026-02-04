@@ -1,7 +1,7 @@
 -- Sonic Screwdriver device database (schema + seed)
-DROP TABLE IF EXISTS sonic_devices;
+DROP TABLE IF EXISTS devices;
 
-CREATE TABLE sonic_devices (
+CREATE TABLE devices (
   id TEXT PRIMARY KEY,
   vendor TEXT NOT NULL,
   model TEXT NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE sonic_devices (
   udos_launcher TEXT NOT NULL
 );
 
-INSERT INTO sonic_devices (
+INSERT INTO devices (
   id, vendor, model, variant, year, cpu, gpu, ram_gb, storage_gb,
   bios, secure_boot, tpm, usb_boot, ventoy, reflash_potential,
   methods, notes, sources, last_seen, windows10_boot, media_mode, udos_launcher

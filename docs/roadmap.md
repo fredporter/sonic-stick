@@ -2,7 +2,7 @@
 
 **Scope:** Standalone USB builder + device database + uDOS compatibility
 
-## Now (v1.1.0 Draft)
+## Now (v1.3.0)
 - Document standalone contract + decoupleable packaging
 - Specify Ventoy-free partition layout
 - Add Windows 10 install/WTG modes

@@ -4,13 +4,13 @@
   "name": "uDOS Sonic Screwdriver",
   "version": {
     "major": 1,
-    "minor": 0,
-    "patch": 1
+    "minor": 3,
+    "patch": 0
   },
-  "display": "v1.0.1",
+  "display": "v1.3.0",
   "channel": "alpha",
-  "released": "2026-01-24",
-  "description": "Sonic Screwdriver USB builder with core planning and OS-aware bash execution",
+  "released": "2026-02-04",
+  "description": "Sonic Screwdriver USB builder aligned with uDOS v1.3 release manifest",
   "changelog": "CHANGELOG.md",
   "metadata": {
     "requires_root": true,
