@@ -26,6 +26,12 @@
 - Device database syncing is defined in the schema but the synchronized service/daemon that ships with Wizard is still missing; prioritize a `devices.db` importer plus metadata sync hooks so the TUI/Portal can surface the latest entries.
 - Windows games/media-player integrations are roadmapped but currently have no runtime surface; document the codec/launcher requirements so a future Wizard/Sonic media console can be scoped before coding begins.
 
+## v1.3 Core Alignment Notes (for v1.2.x tasks)
+- Package new tooling as plugins/containers with `manifest.json` per `docs/PLUGIN-MANIFEST-SPEC.md` (not just `container.json`).
+- Use `library/sonic/schemas` as the canonical validation surface for datasets/build scripts.
+- Partitioning/bootloader tooling should declare runtime/permissions and avoid writing secrets outside the Wizard keystore (see `docs/specs/ENV-STRUCTURE-V1.1.0.md`).
+- Tag the v1.2.x tasks as v1.3 line items in releases to avoid versioning ambiguity.
+
 ## Notes
 - Sonic remains compatible with uDOS but must run independently.
 - Build operations remain Linux-only (Alpine/Ubuntu).
